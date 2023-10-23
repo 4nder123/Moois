@@ -77,7 +77,7 @@ const getdone = function(id){
         return fs.readFileSync('./database/user-saved-info/'+id+'.json')
     }
     else{
-        return {"done":[]}
+        return '{"done":[]}'
     }
 }
 
@@ -89,7 +89,7 @@ app.post('/register', async (req, res) => {
             //encrypt the password
             const hashedPwd = await bcrypt.hash(req.body.password, 10);
             //store the new user
-            const newUser = { "id": usersdb.users.length + 1 ,"user": user, "password": hashedPwd ,"moodle": "", "ois": "", "allow": 1, "token": [], "pohivaade": "tunniplaan"};
+            const newUser = { "id": usersdb.users.length + 1 ,"user": user, "password": hashedPwd ,"moodle": "", "ois": "", "allow": 0, "token": [], "pohivaade": "tunniplaan"};
             usersdb.users.push(newUser)
             await fsPromises.writeFile(
                 path.join(__dirname, '/database/users.json'),
@@ -200,7 +200,7 @@ app.get('/tunniplaan', verifyJWT, function(req,res){
 
 app.get('/kodutood', verifyJWT, function(req,res){
     const user = usersDB().users.find(person => person.id === res.id)
-    getevents(user.moodle).then(response => res.render('kodutoo.ejs', {id: res.id, events: response, moodle:user.moodle, ois:user.ois, pohivaade:user.pohivaade, evstatus: JSON.stringify(getdone(res.id))}))
+    getevents(user.moodle).then(response => res.render('kodutoo.ejs', {id: res.id, events: response, moodle:user.moodle, ois:user.ois, pohivaade:user.pohivaade, evstatus: getdone(res.id)}))
 })
 
 app.get('/', verifyJWT, function(req,res){
