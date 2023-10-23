@@ -200,7 +200,7 @@ app.get('/tunniplaan', verifyJWT, function(req,res){
 
 app.get('/kodutood', verifyJWT, function(req,res){
     const user = usersDB().users.find(person => person.id === res.id)
-    getevents(user.moodle).then(response => res.render('kodutoo.ejs', {id: res.id, events: response, moodle:user.moodle, ois:user.ois, pohivaade:user.pohivaade, evstatus: getdone(res.id)}))
+    getevents(user.moodle).then(response => res.render('kodutoo.ejs', {id: res.id, events: response, moodle:user.moodle, ois:user.ois, pohivaade:user.pohivaade, evstatus: JSON.stringify(getdone(res.id))}))
 })
 
 app.get('/', verifyJWT, function(req,res){
