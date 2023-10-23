@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moois</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script type='importmap'>
+        {
+          "imports": {
+            "@fullcalendar/": "https://cdn.skypack.dev/@fullcalendar/"
+          }
+        }
+      </script>
+    <script type='module'>
+        import { Calendar } from '@fullcalendar/core';
+        import listPlugin from '@fullcalendar/list';
+        import etLocale from '@fullcalendar/core/locales/et';
+        import dayGridPlugin from '@fullcalendar/daygrid';
+        import timeGridPlugin from '@fullcalendar/timegrid';
+        import rrulePlugin from '@fullcalendar/rrule';
+
+        const kodutood = []
+
+        function savetodb(evdone){
+            fetch("/savedone", {method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({"done": evdone})
+            })
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            let evstatus = <%-evstatus%>;
+            if(evstatus.done === undefined){
+                evstatus = []
+                localStorage.setItem("evstatus", "")
+            }
+            else{
+                evstatus = evstatus.done
+                localStorage.setItem("evstatus", evstatus.toString())
+            }
+            let calendar = new Calendar(calendarEl, {
+                customButtons: {
+                    tunniplaan: {
+                        text: 'Tunniplaan',
+                        click: function() {
+                            window.location.href = "/tunniplaan";
+                        }
+                    },
+                    settings: {
+                        click: function() {
+                            document.getElementById('my-modal').style.display='block';
+                        }
+                    }
+                },
+                locale: etLocale,
+                defaultTimedEventDuration: 0,
+                events: <%-JSON.stringify(events)%>,
+                eventDidMount: function(info) {
+                    let done = false;
+                    var kodutoo = info.el.getElementsByClassName("fc-list-event-title")
+                    kodutood.push(kodutoo[0].innerText)
+                    if(evstatus.includes(kodutoo[0].innerText)){
+                        kodutoo[0].innerHTML = "<a><s>"+kodutoo[0].innerText+"</s></a>"
+                        done = true
+                    }
+                    document.addEventListener("click", function(e){
+                        if(info.el.contains(e.target) && !done){
+                            var kodutoo = info.el.getElementsByClassName("fc-list-event-title")
+                            evstatus.push(kodutoo[0].innerText)
+                            localStorage.setItem("evstatus", evstatus)
+                            savetodb(evstatus)
+                            kodutoo[0].innerHTML = "<a><s>"+kodutoo[0].innerText+"</s></a>"
+                            done = true
+                        }
+                        else if(info.el.contains(e.target) && done){
+                            var kodutoo = info.el.getElementsByClassName("fc-list-event-title")
+                            evstatus.splice(evstatus.indexOf(kodutoo[0].innerText), 1)
+                            localStorage.setItem("evstatus", evstatus)
+                            savetodb(evstatus)
+                            kodutoo[0].innerHTML = "<a>"+kodutoo[0].innerText+"</a>"
+                            done = false
+                        }
+                    })    
+                },
+                contentHeight: "auto",
+                plugins: [ listPlugin ],
+                initialView: 'listYear',
+                headerToolbar: {
+                left: 'tunniplaan',
+                center: '',
+                right: 'prev,next settings'
+                }
+            });
+            calendar.render()
+            document.querySelector(".fc-header-toolbar").classList.add("kodutooheader");
+            document.getElementsByClassName("fc-view-harness")[0].style = "top: 55px;" ;
+            document.getElementsByClassName("fc-settings-button")[0].innerHTML = '<span class="fa fa-gear" style="font-size:25.42px; text-align: center; display: flex;"></span>';
+
+            if(!kodutood[0].includes("ERROR")){
+                let evstatus = localStorage.getItem("evstatus").split(",")
+                for(let i = 0; i < evstatus.length; i++){
+                    if(!kodutood.includes(evstatus[i])){
+                        evstatus.splice(i, 1);
+                    }
+                }
+                localStorage.setItem("evstatus", evstatus)
+                savetodb(evstatus)
+            }
+
+        })
+    </script>
+</head>
+<body>
+    <script>
+        
+        document.addEventListener("scroll", (event) => {
+                let scroll = this.scrollY;
+                if (scroll > 2) {
+                    document.querySelector(".fc-header-toolbar").classList.add("shadow");
+                } else {
+                    document.querySelector(".fc-header-toolbar").classList.remove("shadow");
+                }
+            });
+    
+    </script>
+    <div id='calendar'></div>
+    <div id="my-modal" class="modal">
+        <form action="/settingssave" method="POST">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="submit" class="close" onclick="document.getElementById('my-modal').style.display='none'">&times;</button>
+                <h2>Seadmed</h2>
+            </div>
+            <div class="modal-body">
+                <p>Õis kalendri link:<input name="ois" type="text" id="ois" value="<%=ois%>" placeholder="Õis"/></p>
+                <p>Moodle kalendri link:<input name="moodle" type="text" value="<%=moodle%>"  id="moodle" placeholder="Moodle"/></p>
+                <p>Põhivaade:<select name="pohivaade" id="pohivaade" class="pohivaade">
+                    <% if(pohivaade == 'tunniplaan'){%>
+                        <option id="pohivaade" value='tunniplaan' selected>Tunniplaan</option>
+                        <option id="pohivaade" value='kodutoo'>Kodutoo</option>
+                    <%} else {%>
+                        <option id="pohivaade" value='tunniplaan'>Tunniplaan</option>
+                        <option id="pohivaade" value='kodutoo' selected>Kodutöö</option>
+                    <%}%>
+                </select></p>
+                <p><button type="button" class="logout-button" onclick="window.location.href='logout'">Logi välja</button></p>
+            </div>
+            </div>
+        </form>
+      </div>
+</body>
+</html>

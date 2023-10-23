@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moois</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="login-page">
+        <div class="form">
+          <% if(message.length>0){ %>
+            <div class="<%=type%>">
+                <%=message%>
+            </div>
+          <% } %>
+          <form action="/login" method="POST">
+            <input name="email" type="email" id="email" value="<%=email%>" placeholder="email" required/>
+            <input name="password" type="password" id="password" placeholder="parool" required/>
+            <button type="submit">logi sisse</button>
+            <p class="message">Ei ole kasutaja? <a href="register">Loo kasutaja</a></p>
+          </form>
+        </div>
+      </div>
+</body>
+</html>
