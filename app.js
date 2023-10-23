@@ -89,7 +89,7 @@ app.post('/register', async (req, res) => {
             //encrypt the password
             const hashedPwd = await bcrypt.hash(req.body.password, 10);
             //store the new user
-            const newUser = { "id": usersdb.users.length + 1 ,"user": user, "password": hashedPwd ,"moodle": "", "ois": "", "allow": 1, "token": [], "pohivaade": "tunniplaan"};
+            const newUser = { "id": usersdb.users.length + 1 ,"user": user, "password": hashedPwd ,"moodle": "", "ois": "", "allow": 0, "token": [], "pohivaade": "tunniplaan"};
             usersdb.users.push(newUser)
             await fsPromises.writeFile(
                 path.join(__dirname, '/database/users.json'),
