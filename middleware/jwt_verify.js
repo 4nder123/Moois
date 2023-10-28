@@ -9,37 +9,46 @@ const usersDB = () => {
 
 const verifyJWT = (req, res, next) => {
     try{
-        jwt.verify(req.cookies.Token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
-            if (err) {
-                const usersdb = usersDB()
-                const user = usersdb.users.find(function(person){
-                    for(i=0 ; i < person.token.length; i++){
-                        if(person.token[i] === req.cookies.RToken){
-                            return person
-                        }
-                    }
-                })
-                if(user){
-                    const token = jwt.sign({"id": user.id}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10s' })
-                    user.token = user.token.filter(function(item) {
-                        return item !== req.cookies.RToken;
-                    })
-                    const rtoken = jwt.sign({"id": user.id, "date": Date.now()}, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
-                    user.token.push(rtoken)
-                    res.cookie('Token', token, { maxAge: 10000, httpOnly: true })
-                    res.cookie('RToken', rtoken, { maxAge: 2592000000, httpOnly: true })
-                    fs.writeFileSync(path.join(__dirname, '../database/users.json'),JSON.stringify(usersdb.users))
-                    res.id = user.id
+        if(req.cookies.Token !== undefined){
+            jwt.verify(req.cookies.Token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+                if (err) {
+                    res.redirect("login")
+                } else {
+                    res.id = decoded.id
                     next()
                 }
-                else{
+            })
+        }
+        else if (req.cookies.RToken !== undefined){
+            jwt.verify(req.cookies.RToken, process.env.REFRESH_TOKEN_SECRET,function (err, decoded) {
+                if(err){
                     res.redirect("login")
+                } else {
+                    const usersdb = usersDB()
+                    const user = usersdb.users.find(person => person.token.includes(req.cookies.RToken))
+                    if(user){
+                        user.token = user.token.filter(function(item) {
+                            return item !== req.cookies.RToken;
+                        })
+                        const rtoken = jwt.sign({"id": user.id, "date": Date.now()}, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
+                        const token = jwt.sign({"id": user.id}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20m' })
+                        user.token.push(rtoken)
+                        res.cookie('Token', token, { maxAge: 1200000, httpOnly: true })
+                        res.cookie('RToken', rtoken, { maxAge: 2592000000, httpOnly: true })
+                        fs.writeFileSync(path.join(__dirname, '../database/users.json'),JSON.stringify(usersdb.users, null, 4))
+                        res.id = user.id
+                        next()
+                    }
+                    else{
+                        res.redirect("login")
+                    }
                 }
-            } else {
-                res.id = decoded.id
-                next()
-            }
-        })
+
+            })
+        }
+        else{
+            res.redirect("login")
+        }
     } catch(err) {
         console.log(err)
         res.redirect("login")
@@ -47,4 +56,14 @@ const verifyJWT = (req, res, next) => {
 
 }
 
-module.exports = verifyJWT
+function isloggedin(req, res, next){
+    const user = usersDB().users.find(person => person.token.includes(req.cookies.RToken))
+    if(user){
+        res.redirect("/")
+    }
+    else{
+        next()
+    }
+}
+
+module.exports = {verifyJWT, isloggedin}

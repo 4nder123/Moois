@@ -1,1 +1,14 @@
-[]
+[
+    {
+        "id": 1,
+        "user": "anderjar@ut.ee",
+        "password": "$2b$10$ERtjLckX9Ky8qqGWVdMGsuM85uSrowXFAOErucsc1qejt2DNiVY3a",
+        "moodle": "https://moodle.ut.ee/calendar/export_execute.php?userid=140397&authtoken=a548c6a57b8dc60ae021bbcfaeff6fe65953e777&preset_what=all&preset_time=custom",
+        "ois": "https://ois2.ut.ee/api/timetable/personal/link/e27918074f1f406e8ece0c5d78bfacf0/et",
+        "allow": 1,
+        "token": [
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZGF0ZSI6MTY5ODQ1NDM0MDA4NiwiaWF0IjoxNjk4NDU0MzQwLCJleHAiOjE3MDEwNDYzNDB9.rR9u3plIH1DnJh9ATwgIIOrX5W1uHMD_2ju87PLFyC8"
+        ],
+        "pohivaade": "kodutoo"
+    }
+]

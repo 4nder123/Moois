@@ -5,6 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Moois</title>
         <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="style_tund.css">
+        <link rel="shortcut icon" href="Moois_website" type="x-icon" />
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -23,7 +25,6 @@
             import rrulePlugin from '@fullcalendar/rrule';
             
             document.addEventListener('DOMContentLoaded', async function() {
-              console.log(<%-JSON.stringify(events)%>)
               const calendarEl = document.getElementById('calendar')
               const calendar = new Calendar(calendarEl, {
                 customButtons: {
@@ -54,7 +55,7 @@
                 eventDidMount: function(info) {
                   if(typeof(info.event.extendedProps.description) != "undefined"){
                     var tooltip = new bootstrap.Tooltip(info.el, {
-                      title: info.event.extendedProps.description.replace(/\\n\\n/g, "<br>"),
+                      title: info.event.extendedProps.description.replace(/\n/g, "<br>"),
                       placement: 'top',
                       trigger: 'manual',
                       html: true,
@@ -85,11 +86,11 @@
                 headerToolbar: {
                   left: 'prev,next today',
                   center: 'title',
-                  right: 'kodutood timeGridWeek,timeGridDay settings'
+                  right: 'timeGridWeek,timeGridDay kodutood settings'
                 },
               })
               calendar.render()
-              document.getElementsByClassName("fc-settings-button")[0].innerHTML = '<span class="fa fa-gear" style="font-size:25.42px; text-align: center; display: flex;"></span>';
+              document.getElementsByClassName("fc-settings-button")[0].innerHTML = '<i class="fa fa-gear"></i>';
             })
           </script>
     </head>

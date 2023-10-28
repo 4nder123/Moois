@@ -3,7 +3,6 @@ const app = express()
 const axios = require('axios')
 const cors = require('cors')
 const path = require('path');
-const iscformater = require("./js-modules/icsformater.js")
 const isctund = require("./js-modules/icsToJson_Tunniplaan.js")
 const isctoo = require("./js-modules/icsToJson_Kodutoo.js")
 const bcrypt = require('bcrypt');
@@ -11,7 +10,7 @@ const fsPromises = require('fs').promises;
 const fs = require('fs')
 const url = require('url')
 const cookieParser = require("cookie-parser")
-const verifyJWT = require('./middleware/jwt_verify.js')
+const {verifyJWT, isloggedin} = require('./middleware/jwt_verify.js')
 const nodeCron = require("node-cron");
 const bodyParser = require("body-parser");
 
@@ -49,7 +48,7 @@ const job = nodeCron.schedule("0 0 0 * * *", () => {
             })
         }
     }
-    fs.writeFileSync(path.join(__dirname, './database/users.json'),JSON.stringify(userdb.users))
+    fs.writeFileSync(path.join(__dirname, './database/users.json'),JSON.stringify(userdb.users, null, 4))
   });
 
 const evjson = function(ev){
@@ -77,7 +76,7 @@ const getdone = function(id){
         return fs.readFileSync('./database/user-saved-info/'+id+'.json')
     }
     else{
-        return {"done":[]}
+        return '[]'
     }
 }
 
@@ -93,7 +92,7 @@ app.post('/register', async (req, res) => {
             usersdb.users.push(newUser)
             await fsPromises.writeFile(
                 path.join(__dirname, '/database/users.json'),
-                JSON.stringify(usersdb.users)
+                JSON.stringify(usersdb.users, null, 4)
             );
             res.redirect(url.format({
                 pathname:"login",
@@ -135,10 +134,10 @@ app.post('/settingssave', verifyJWT,function(req, res){
         user.ois = req.body.ois
         user.moodle = req.body.moodle
         user.pohivaade = req.body.pohivaade
-        fs.writeFileSync(path.join(__dirname, '/database/users.json'),JSON.stringify(usersdb.users))
-        return res.redirect('/')
+        fs.writeFileSync(path.join(__dirname, '/database/users.json'),JSON.stringify(usersdb.users, null, 4))
+        return res.redirect("/")
     }
-    return res.status(204).send()
+    res.redirect(new URL(req.headers.referer).pathname)
 })
 
 app.post('/login', async(req, res) =>{
@@ -150,14 +149,14 @@ app.post('/login', async(req, res) =>{
     else{
         if(await bcrypt.compare(req.body.password, user.password)){
             if(user.allow === 1){
-                const token = jwt.sign({"id": user.id}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10s' })
+                const token = jwt.sign({"id": user.id}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20m' })
                 const rtoken = jwt.sign({"id": user.id, "date": Date.now()}, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
                 user.token.push(rtoken)
-                res.cookie('Token', token, { maxAge: 10000, httpOnly: true })
+                res.cookie('Token', token, { maxAge: 1200000, httpOnly: true })
                 res.cookie('RToken', rtoken, { maxAge: 2592000000, httpOnly: true })
                 await fsPromises.writeFile(
                     path.join(__dirname, '/database/users.json'),
-                    JSON.stringify(usersdb.users)
+                    JSON.stringify(usersdb.users, null, 4)
                 );
                 res.redirect('/');
             }
@@ -176,10 +175,10 @@ const getevents = async (url) => {
         var url = new URL(url)
         return axios.get(url.href).then(async function (response) {
             if(url.hostname == "moodle.ut.ee"){
-                return evjson(await isctoo(iscformater(response.data.toString())))
+                return evjson(await isctoo(response.data.toString()))
             }
             else if(url.hostname == "ois2.ut.ee"){
-                return isctund(iscformater(response.data.toString()))
+                return isctund(response.data.toString())
             }
             else{
                 return ""
@@ -231,41 +230,26 @@ app.get('/login.css', function(req, res) {
   });
 
 app.get('/style.css', function(req, res) {
-res.sendFile(path.join(__dirname + "/views/style.css"));
+    res.sendFile(path.join(__dirname + "/views/style.css"));
+});
+
+app.get('/style_tund.css', function(req, res) {
+    res.sendFile(path.join(__dirname + "/views/style_tund.css"));
+});
+app.get('/Moois_website', function(req, res) {
+    res.sendFile(path.join(__dirname + "/icon/Moois_website.png"));
 });
 
 app.get('/logout', function(req, res) {
     const usersdb = usersDB()
-    const user = usersdb.users.find(function(person){
-        for(i=0 ; i < person.token.length; i++){
-            if(person.token[i] === req.cookies.RToken){
-                return person
-            }
-        }
-    })
+    const user = usersdb.users.find(person => person.token.includes(req.cookies.RToken))
     user.token = user.token.filter(function(item) {
         return item !== req.cookies.RToken;
     })
-    fs.writeFileSync(path.join(__dirname, './database/users.json'),JSON.stringify(usersdb.users))
+    fs.writeFileSync(path.join(__dirname, './database/users.json'),JSON.stringify(usersdb.users, null, 4))
     res.clearCookie("Token");
     res.clearCookie("RToken");
     res.redirect("/")
   });
-
-function isloggedin(req, res, next){
-    const user = usersDB().users.find(function(person){
-        for(i=0 ; i < person.token.length; i++){
-            if(person.token[i] === req.cookies.RToken){
-                return person
-            }
-        }
-    })
-    if(user){
-        res.redirect("/")
-    }
-    else{
-        next()
-    }
-}
 
 app.listen(3000)

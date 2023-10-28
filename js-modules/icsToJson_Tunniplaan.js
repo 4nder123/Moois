@@ -1,5 +1,4 @@
-const NEW_LINE = /\r\n|\n|\r/;
-
+const LINEFIX = /\r\n|\n|\r|\t/gm
 const EVENT = "VEVENT";
 const EVENT_START = "BEGIN";
 const EVENT_END = "END";
@@ -15,19 +14,21 @@ const CATEGORIES = "CATEGORIES";
 const COLOR = "COLOR";
 const EXDATE = "EXDATE";
 
+const allicsparm = 'BEGIN|METHOD|PROIDID|DTSTAMP|UID|DTSTART|CLASS|CREATED|DESCRIPTION|GEO|LAST-MOD|LOCATION|ORGANIZER|PRIORITY|SEQ|STATUS|SUMMARY|TRANSP|URL|RECURID|RRULE|DTEND|DURATION|ATTACH|ATTENDEE|CATEGORIES|COMMENTCONTACT|EXDATE|RSTATUS|RELATED|RESOURCES|RDATE|X-PROP|IANA-PROP|END'
+const wantedicsparm = 'BEGIN|DTSTART|DESCRIPTION|LOCATION|SUMMARY|RRULE|DTEND|DURATION|CATEGORIES|EXDATE|END';
+
+// \\n|\\
 const keyMap = {
   [START_DATE]: "start",
   [END_DATE]: "end",
   [DESCRIPTION]: "description",
   [SUMMARY]: "title",
-  [LOCATION]: "location",
   [RRULE]: "rrule",
   [DURATION]: "duration",
   [COLOR]: "color",
   [EXDATE]: "exdate"
 };
 
-const clean = string => unescape(string).trim();
 const color = function(Category){
   switch(Category){
     case "loeng":
@@ -51,63 +52,39 @@ const color = function(Category){
 module.exports = function(icsData){
   const array = [];
   let currentObj = {};
-  let lastKey = "";
-
-  const lines = icsData.split(NEW_LINE);
+  
+  const lines = icsData.replace(LINEFIX, '').match(new RegExp(`(${wantedicsparm}+:).+?(?=${allicsparm}.+:)`, "gm"));
   let startdate = ""
   let location = ""
-  let isAlarm = false;
-  let isDesc = false;
+  let rrule = ""
+  let dec = ""
   for (let i = 0, iLen = lines.length; i < iLen; ++i) {
     const line = lines[i];
     const lineData = line.split(":");
-
     let key = lineData[0];
-    let s = "";
-    if (lineData.length > 2){
-      for(let i = 0; lineData.length > i; i++){
-        if(i==0){
-          continue;
-        }
-        if(i==1){
-          s += lineData[i]
-          continue
-        }
-        s += ":"+lineData[i]
-      }
-    }
-    else{
-      s = lineData[1];
-    }
-    const value = s;
+    let value = lineData.slice(1).join(":");
+
     if (key.indexOf(";") !== -1) {
       const keyParts = key.split(";");
       key = keyParts[0];
-      // Maybe do something with that second part later
     }
-
-    if (lineData.length < 2) {
-      if (key.startsWith(" ") && lastKey !== undefined && lastKey.length) {
-        currentObj[lastKey] += clean(line.substr(1));
-      }
-      continue;
-    } else {
-      lastKey = keyMap[key];
-    }
-
+    
     switch (key) {
       case EVENT_START:
-        if (value === EVENT) {
-          currentObj = {};
-          isDesc = false;
-          location=""
-        } else if (value === ALARM) {
-          isAlarm = true;
-        }
+        if (value === EVENT){
+          startdate = ""
+          location = ""
+          rrule = ""
+          dec = ""
+          currentObj = {}
+        };
         break;
       case EVENT_END:
-        isAlarm = false;
-        if (value === EVENT) array.push(currentObj);
+        if (value === EVENT) {
+          currentObj[keyMap[DESCRIPTION]] = dec !== "" ? dec + "\n" + location : location;
+          currentObj[keyMap[RRULE]] = "DTSTART;TZID=Europe/Tallinn:"+startdate+"Z;\nRRULE:"+rrule;
+          array.push(currentObj)
+        }
         break;
       case START_DATE:
         startdate = value;
@@ -116,32 +93,28 @@ module.exports = function(icsData){
         currentObj[keyMap[END_DATE]] = value;
         break;
       case DESCRIPTION:
-        isDesc = true;
-        if (!isAlarm) currentObj[keyMap[DESCRIPTION]] = clean(value) +"\\n\\n"+ location;
+        dec = value.replace(/\b[\\n]{2,}/gm,"\n")
         break;
       case SUMMARY:
-        currentObj[keyMap[SUMMARY]] = clean(value);
+        currentObj[keyMap[SUMMARY]] = value;
         break;
       case LOCATION:
-        location = clean(value);
+        location = value;
         break;
       case DURATION:
-        currentObj[keyMap[DURATION]] = clean(value).replace(/[PT]/g,'').replace(/H/g,':').replace(/M/g,':').replace(/S/g,':');
+        currentObj[keyMap[DURATION]] = value.replace(/[PT]/g,'').replace(/H/g,':').replace(/M/g,':').replace(/S/g,'');
         break;
       case CATEGORIES:
-        currentObj[keyMap[COLOR]] = color(clean(value))
+        currentObj[keyMap[COLOR]] = color(value)
         break;
       case EXDATE:
-        currentObj[keyMap[EXDATE]] = value.split(",")
+        currentObj[keyMap[EXDATE]] = value.replace(/\s/g,"").split(",")
         break;
       case RRULE:
-        currentObj[keyMap[RRULE]] = "DTSTART;TZID=Europe/Tallinn:"+startdate+"Z;\nRRULE:"+clean(value);
+        rrule = value
         break;
       default:
         continue;
-    }
-    if(isDesc == false){
-      if (!isAlarm) currentObj[keyMap[DESCRIPTION]] = location;
     }
   }
   return array;
