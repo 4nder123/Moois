@@ -18,7 +18,7 @@ const keyMap = {
   [SUMMARY]: "title",
 };
 
-let ainekoodid = {"ERROR":"ERROR"}
+let ainekoodid = {}
 
 const aine = async (ainekood) => {
     if(ainekood in ainekoodid){
@@ -67,7 +67,14 @@ module.exports = async(icsData) => {
         if (value === EVENT) currentObj = {};
         break;
       case EVENT_END:
-        currentObj[keyMap[SUMMARY]] = ainenim + " - " + title;
+        if(ainenim != ""){
+          currentObj[keyMap[SUMMARY]] = ainenim + " - " + title;
+        }
+        else{
+          currentObj[keyMap[SUMMARY]] = title;
+        }
+        ainenim = "";
+        title = "";
         if (value === EVENT) array.push(currentObj);
         break;
       case START_DATE:

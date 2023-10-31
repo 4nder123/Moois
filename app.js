@@ -170,46 +170,32 @@ app.post('/login', async(req, res) =>{
     }
 })
 
-const getevents = async (url) => {
+app.post('/getevents', async(req,res) => {
+    let url = req.body.calurl
     if(url!=""){
-        var url = new URL(url)
-        return axios.get(url.href).then(async function (response) {
+        url = new URL(url)
+        axios.get(url.href).then(async function (response) {
             if(url.hostname == "moodle.ut.ee"){
-                return evjson(await isctoo(response.data.toString()))
+                res.send(evjson(await isctoo(response.data.toString())))
             }
             else if(url.hostname == "ois2.ut.ee"){
-                return isctund(response.data.toString())
+                res.send(isctund(response.data.toString()))
             }
             else{
                 return ""
             }
         }).catch(function (error) {
-            return ""
+            res.send("")
         })
     }
     else{
-        return ""
+        res.send("")
     }
-}
-
-app.get('/tunniplaan', verifyJWT, function(req,res){
-    const user = usersDB().users.find(person => person.id === res.id)
-    getevents(user.ois).then(response => res.render('tunniplaan.ejs', {id: res.id, events: response, moodle:user.moodle, ois:user.ois, pohivaade:user.pohivaade}))
-})
-
-app.get('/kodutood', verifyJWT, function(req,res){
-    const user = usersDB().users.find(person => person.id === res.id)
-    getevents(user.moodle).then(response => res.render('kodutoo.ejs', {id: res.id, events: response, moodle:user.moodle, ois:user.ois, pohivaade:user.pohivaade, evstatus: getdone(res.id)}))
 })
 
 app.get('/', verifyJWT, function(req,res){
     const user = usersDB().users.find(person => person.id === res.id)
-    if(user.pohivaade == "tunniplaan"){
-       res.redirect('/tunniplaan')
-    }
-    else{
-        res.redirect('/kodutood')
-    }
+    res.render('index.ejs', {id: res.id, moodle:user.moodle, ois:user.ois, pohivaade:user.pohivaade, evstatus: getdone(res.id)})
 })
 
 app.get('/register', isloggedin,function(req,res){
@@ -225,6 +211,14 @@ app.get('/login', isloggedin,function(req,res){
     }
 })
 
+app.get('/tunniplaan', verifyJWT, function(req,res){
+    res.sendFile(path.join(__dirname + "/js-modules/tunniplaan.js"));
+})
+
+app.get('/kodutoo', verifyJWT, function(req,res){
+    res.sendFile(path.join(__dirname + "/js-modules/kodutoo.js"));
+})
+
 app.get('/login.css', function(req, res) {
     res.sendFile(path.join(__dirname + "/views/login.css"));
   });
@@ -233,20 +227,21 @@ app.get('/style.css', function(req, res) {
     res.sendFile(path.join(__dirname + "/views/style.css"));
 });
 
-app.get('/style_tund.css', function(req, res) {
-    res.sendFile(path.join(__dirname + "/views/style_tund.css"));
-});
 app.get('/Moois_website', function(req, res) {
     res.sendFile(path.join(__dirname + "/icon/Moois_website.png"));
 });
 
 app.get('/logout', function(req, res) {
     const usersdb = usersDB()
-    const user = usersdb.users.find(person => person.token.includes(req.cookies.RToken))
-    user.token = user.token.filter(function(item) {
-        return item !== req.cookies.RToken;
-    })
-    fs.writeFileSync(path.join(__dirname, './database/users.json'),JSON.stringify(usersdb.users, null, 4))
+    try{
+        const user = usersdb.users.find(person => person.token.includes(req.cookies.RToken))
+        user.token = user.token.filter(function(item) {
+            return item !== req.cookies.RToken;
+        })
+        fs.writeFileSync(path.join(__dirname, './database/users.json'),JSON.stringify(usersdb.users, null, 4))
+    } catch (err) {
+
+    }
     res.clearCookie("Token");
     res.clearCookie("RToken");
     res.redirect("/")

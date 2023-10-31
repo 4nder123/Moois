@@ -47,6 +47,8 @@ const color = function(Category){
       return "#ff5252";
     case "konsultatsioon":
       return "#ffdd83";
+    case "seminar":
+      return "#ffab88"
   }
 }
 module.exports = function(icsData){
@@ -54,6 +56,7 @@ module.exports = function(icsData){
   let currentObj = {};
   
   const lines = icsData.replace(LINEFIX, '').match(new RegExp(`(${wantedicsparm}+:).+?(?=${allicsparm}.+:)`, "gm"));
+  lines.push("END:VEVENT");
   let startdate = ""
   let location = ""
   let rrule = ""
