@@ -51,34 +51,49 @@ const job = nodeCron.schedule("0 0 0 * * *", () => {
     fs.writeFileSync(path.join(__dirname, './database/users.json'),JSON.stringify(userdb.users, null, 4))
   });
 
-const evjson = function(ev){
-    for(var key in ev){
-        for(var key2 in ev){
-            if(key!=key2){
-                if(ev[key].title.replace(/\w+[.!?]?$/, '')==ev[key2].title.replace(/\w+[.!?]?$/, '') && ev[key].start.slice(0,-7) == ev[key2].start.slice(0,-7)){
-                    ev[key2].title = ev[key2].title.replace(/\w+[.!?]?$/, '')
-                    ev[key2].start = ev[key].start
-                    ev.splice(key, 1)
-                }
-            }
-        }
-    }
-    return ev
-}
 
 app.post("/savedone", verifyJWT, function(req, res){
-    fs.writeFileSync(path.join(__dirname, './database/user-saved-info/'+res.id+'.json'),JSON.stringify(req.body))
+    const filePath = path.join(__dirname, `./database/user-saved-info/${res.id}.json`);
+    if (fs.existsSync(filePath)) {
+        let info = JSON.parse(fs.readFileSync(filePath));
+
+        switch (req.body.action) {
+            case "ev-save":
+                info.done.push(req.body.info);
+                break;
+            case "ev-remove":
+                info.done = info.done.filter(done => done !== req.body.info);
+                break;
+            case "high-save":
+                let isSaved = info.highlight.find(high => high[0] === req.body.info[0]);
+                if(isSaved){
+                    isSaved[1] = req.body.info[1]
+                }
+                else {
+                    info.highlight.push(req.body.info);
+                }
+                break;
+            case "high-remove":
+                info.highlight = info.highlight.filter(high => high[0] !== req.body.info);
+                break;
+            default:
+                break;
+        }
+
+        fs.writeFileSync(filePath, JSON.stringify(info));
+    } else {
+        let data;
+        if (req.body.action === "ev-save") {
+            data = { done: [req.body.info], highlight: [] };
+        } else if (req.body.action === "high-save") {
+            data = { done: [], highlight: [req.body.info] };
+        } else {
+            data = { done: [], highlight: [] };
+        }
+        fs.writeFileSync(filePath, JSON.stringify(data));
+    }
     return res.status(204).send()
 })
-
-const getdone = function(id){
-    if (fs.existsSync('./database/user-saved-info/'+id+'.json')) {
-        return fs.readFileSync('./database/user-saved-info/'+id+'.json')
-    }
-    else{
-        return '[]'
-    }
-}
 
 app.post('/register', async (req, res) => {
     const usersdb = usersDB()
@@ -170,13 +185,13 @@ app.post('/login', async(req, res) =>{
     }
 })
 
-app.post('/getevents', async(req,res) => {
+app.post('/getevents', verifyJWT, async(req,res) => {
     let url = req.body.calurl
     if(url!=""){
         url = new URL(url)
         axios.get(url.href).then(async function (response) {
             if(url.hostname == "moodle.ut.ee"){
-                res.send(evjson(await isctoo(response.data.toString())))
+                res.send(await isctoo(response.data.toString(), res.id))
             }
             else if(url.hostname == "ois2.ut.ee"){
                 res.send(isctund(response.data.toString()))
@@ -195,7 +210,7 @@ app.post('/getevents', async(req,res) => {
 
 app.get('/', verifyJWT, function(req,res){
     const user = usersDB().users.find(person => person.id === res.id)
-    res.render('index.ejs', {id: res.id, moodle:user.moodle, ois:user.ois, pohivaade:user.pohivaade, evstatus: getdone(res.id)})
+    res.render('index.ejs', {id: res.id, moodle:user.moodle, ois:user.ois, pohivaade:user.pohivaade})
 })
 
 app.get('/register', isloggedin,function(req,res){
@@ -217,6 +232,10 @@ app.get('/tunniplaan', verifyJWT, function(req,res){
 
 app.get('/kodutoo', verifyJWT, function(req,res){
     res.sendFile(path.join(__dirname + "/js-modules/kodutoo.js"));
+})
+
+app.get('/long-press-event', verifyJWT, function(req,res){
+    res.sendFile(path.join(__dirname + "/js-modules/long-press-event.min.js"));
 })
 
 app.get('/login.css', function(req, res) {

@@ -215,15 +215,25 @@ input:checked + label:after {
   transform: translateX(-100%);
 }
 
+.fc-list-event{
+  --fc-list-event-hover-bg-color: rgb(0,0,0,0.05); 
+}
+
+.fc-list-table tbody tr th{
+  column-span: 4;
+}
 
 .dark-mode {
   background-color: #121212;
   color: #bbbbbb;
   --fc-border-color: #3f3f3f;
   --fc-page-bg-color: #3f3f3f;
-  --fc-list-event-hover-bg-color: #1f1e1e;
   --fc-today-bg-color: 	rgba(75, 75, 75, 0.3);
   
+  .fc-list-event{
+    --fc-list-event-hover-bg-color: rgba(100, 100, 100, 0.15); 
+  }
+
   .fc-timegrid-event-harness .fc-event {
     filter: brightness(70%);
   }
@@ -244,4 +254,31 @@ input:checked + label:after {
     color:#bbbbbb;
     background: #3d3d3d;
   }
+}
+
+.highlight-btn{
+  width: 0;
+  vertical-align: center;
+}
+
+.box {
+  float: left;
+  height: 20px;
+  width: 20px;
+  border: 1px solid black;
+  display: inline;
+}
+
+.red {
+  background-color: red;
+}
+
+.orange {
+  background-color: orange;
+  margin-left: 10px;
+}
+
+.yellow {
+  background-color: yellow;
+  margin-left: 15px;
 }

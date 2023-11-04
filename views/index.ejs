@@ -8,42 +8,41 @@
     <link rel="shortcut icon" href="Moois_website" type="x-icon" />
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="/long-press-event"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script type="module">
         import loadTunniplaan from '/tunniplaan';
         import loadKodutoo from '/kodutoo';
 
-        if('<%-pohivaade-%>' === 'tunniplaan' & !window.name){
-            window.name = 'tunniplaan'
-            document.getElementById('tunniplaan').style.display='block';
-            document.getElementById('kodutoo').style.display='none';
-        }
-        else if(window.name === 'tunniplaan'){
-            document.getElementById('tunniplaan').style.display='block';
-            document.getElementById('kodutoo').style.display='none';
-        }
-        else{
-            window.vaade = 'kodutoo'
-            document.getElementById('tunniplaan').style.display='none';
-            document.getElementById('kodutoo').style.display='block';
-        }
+        const tunniplaanElement = document.getElementById('tunniplaan');
+        const kodutooElement = document.getElementById('kodutoo');
 
-        if(localStorage.getItem("dark_mode") !== null){
-            if(localStorage.getItem("dark_mode") === "true"){
-                let element = document.body;
-                element.classList.add("dark-mode");
-            }
+        const isTunniplaan = '<%-pohivaade-%>' === 'tunniplaan';
+
+        if (isTunniplaan || window.name === 'tunniplaan') {
+            window.name = 'tunniplaan';
+            tunniplaanElement.style.display = 'block';
+            kodutooElement.style.display = 'none';
+        } else {
+            window.vaade = 'kodutoo';
+            tunniplaanElement.style.display = 'none';
+            kodutooElement.style.display = 'block';
         }
 
         document.addEventListener('DOMContentLoaded', function(){
             const tunniplaan = loadTunniplaan('<%-ois%>')
-            const kodutoo = loadKodutoo('<%-moodle%>',<%-evstatus%>)
-            console.log(tunniplaan)
-            document.getElementsByClassName('fc-kodutood-button')[0].addEventListener("click", function(){
+            const kodutoo = loadKodutoo('<%-moodle%>')
+
+            const kodutooButton = document.querySelector('.fc-kodutood-button');
+            const tunniplaanButton = document.querySelector('.fc-tunniplaan-button');
+
+            kodutooButton.addEventListener("click", function(){
+                kodutoo.refetchEvents();
                 kodutoo.updateSize();
             })
             
-            document.getElementsByClassName('fc-tunniplaan-button')[0].addEventListener("click", function(){
+            tunniplaanButton.addEventListener("click", function(){
+                tunniplaan.refetchEvents();
                 tunniplaan.updateSize();
             })
 
@@ -54,15 +53,12 @@
                 }
             })
             
-            document.getElementById('switch').addEventListener('change', function() {
-                let element = document.body;
-                if (this.checked) {
-                    localStorage.setItem("dark_mode", true)
-                    element.classList.add("dark-mode");
-                } else {
-                    localStorage.setItem("dark_mode", false)
-                    element.classList.remove("dark-mode");
-                }
+            const switchElement = document.getElementById('switch');
+            switchElement.addEventListener('change', function () {
+                const element = document.body;
+                const isDarkMode = switchElement.checked;
+                localStorage.setItem("dark_mode", isDarkMode);
+                element.classList.toggle("dark-mode", isDarkMode);
             });
         })
         
@@ -70,6 +66,12 @@
 </head>
 <body>
     <script>
+        if(localStorage.getItem("dark_mode") !== null){
+            if(localStorage.getItem("dark_mode") === "true"){
+                let element = document.body;
+                element.classList.add("dark-mode");
+            }
+        }
         document.addEventListener("scroll", (event) => {
                 let scroll = this.scrollY;
                 if (scroll > 2 & document.getElementById('kodutoo').style.display === 'block') {
