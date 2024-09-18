@@ -7,63 +7,56 @@ const usersDB = () => {
     return { "users": JSON.parse(fs.readFileSync('./database/users.json'))}
 }
 
-const verifyJWT = (req, res, next) => {
-    try{
-        if(req.cookies.Token !== undefined){
-            jwt.verify(req.cookies.Token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
-                if (err) {
-                    res.redirect("login")
-                } else {
-                    res.id = decoded.id
-                    next()
-                }
-            })
+const verifyJWT = async (req, res, next) => {
+    try {
+        const { Token, RToken } = req.cookies;
+        const usersdb = usersDB();
+
+        // Helper functions
+        const generateTokens = (user) => {
+            const token = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10m' });
+            const rtoken = jwt.sign({ id: user.id, date: Date.now() }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '30d' });
+            user.token.push(rtoken);
+            return { token, rtoken };
+        };
+
+        const setCookies = (token, rtoken) => {
+            res.cookie('Token', token, { maxAge: 600000, secure:true, httpOnly: true }); // 20 minutes
+            res.cookie('RToken', rtoken, { maxAge: 2592000000, secure:true, httpOnly: true }); // 30 days
+        };
+
+        if (Token) {
+            try {
+                const decoded = await jwt.verify(Token, process.env.ACCESS_TOKEN_SECRET);
+                req.id = decoded.id;
+                return next();
+            } catch (err) {}
         }
-        else if (req.cookies.RToken !== undefined){
-            jwt.verify(req.cookies.RToken, process.env.REFRESH_TOKEN_SECRET,function (err, decoded) {
-                if(err){
-                    res.redirect("login")
-                } else {
-                    const usersdb = usersDB()
-                    const user = usersdb.users.find(person => person.token.includes(req.cookies.RToken))
-                    if(user){
-                        user.token = user.token.filter(function(item) {
-                            return item !== req.cookies.RToken;
-                        })
-                        const rtoken = jwt.sign({"id": user.id, "date": Date.now()}, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
-                        const token = jwt.sign({"id": user.id}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20m' })
-                        user.token.push(rtoken)
-                        res.cookie('Token', token, { maxAge: 1200000, httpOnly: true })
-                        res.cookie('RToken', rtoken, { maxAge: 2592000000, httpOnly: true })
-                        fs.writeFileSync(path.join(__dirname, '../database/users.json'),JSON.stringify(usersdb.users, null, 4))
-                        res.id = user.id
-                        next()
-                    }
-                    else{
-                        res.redirect("login")
-                    }
-                }
+        
+        if (RToken) {
+            try {
+                const decoded = await jwt.verify(RToken, process.env.REFRESH_TOKEN_SECRET);
 
-            })
+                const user = usersdb.users.find(person => person.token.includes(RToken));
+                if (!user) return next(new Error("User not found"));
+
+                user.token = user.token.filter(item => item !== RToken);
+                const { token, rtoken } = generateTokens(user);
+
+                setCookies(token, rtoken);
+                fs.writeFileSync(path.join(__dirname, '../database/users.json'), JSON.stringify(usersdb.users, null, 4));
+
+                req.id = user.id;
+                return next();
+            } catch (err) {
+                return next(new Error("invalid token"));
+            }
         }
-        else{
-            res.redirect("login")
-        }
-    } catch(err) {
-        console.log(err)
-        res.redirect("login")
-    }
+        return next(new Error("No tokens"));
 
-}
-
-function isloggedin(req, res, next){
-    const user = usersDB().users.find(person => person.token.includes(req.cookies.RToken))
-    if(user){
-        res.redirect("/")
+    } catch (err) {
+        return next(new Error("Unkown error"));
     }
-    else{
-        next()
-    }
-}
+};
 
-module.exports = {verifyJWT, isloggedin}
+module.exports = {verifyJWT}
