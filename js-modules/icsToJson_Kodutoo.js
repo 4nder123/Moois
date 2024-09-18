@@ -1,27 +1,11 @@
 const axios = require('axios')
 const fs = require('fs')
 const path = require('path');
+const ical = require("node-ical");
 
-const LINEFIX = /\\n|\\|\t|\r\n|\n|\r/gm
-
-const EVENT = "VEVENT";
-const EVENT_START = "BEGIN";
-const EVENT_END = "END";
-const START_DATE = "DTSTART";
-const END_DATE = "DTEND";
-const SUMMARY = "SUMMARY";
-const CATEGORIES = "CATEGORIES";
 const exprops = "extendedProps";
-const allicsparm = 'BEGIN|METHOD|PROIDID|DTSTAMP|UID|DTSTART|CLASS|CREATED|DESCRIPTION|GEO|LAST-MOD|LOCATION|ORGANIZER|PRIORITY|SEQ|STATUS|SUMMARY|TRANSP|URL|RECURID|RRULE|DTEND|DURATION|ATTACH|ATTENDEE|CATEGORIES|COMMENTCONTACT|EXDATE|RSTATUS|RELATED|RESOURCES|RDATE|X-PROP|IANA-PROP|END'
-const wantedicsparm = 'BEGIN|DTSTART|SUMMARY|DTEND|CATEGORIES|END';
 
-const keyMap = {
-  [START_DATE]: "start",
-  [END_DATE]: "end",
-  [SUMMARY]: "title",
-};
-
-let ainekoodid = {}
+const ainekoodid = {}
 
 const getdone = function(id){
     if (fs.existsSync(path.join(__dirname, '../database/user-saved-info/'+id+'.json'))) {
@@ -32,18 +16,19 @@ const getdone = function(id){
     }
 }
 
-const evjson = function(events){
-  return events.filter((event, index) => {
-    for (let i = 0; i < index; i++) {
-      if (
-        event.title.replace(/\w+[.!?]?$/, '') === events[i].title.replace(/\w+[.!?]?$/, '') &&
-        event.start.slice(0, -7) === events[i].start.slice(0, -7)
-      ) {
-        return false;
-      }
+const evjson = function(ev){
+  for(var key in ev){
+    for(var key2 in ev){
+        if(key!=key2){
+            if(ev[key].title.replace(/\w+[.!?]?$/, '')==ev[key2].title.replace(/\w+[.!?]?$/, '') && ev[key].start.slice(0,-13) == ev[key2].start.slice(0,-13)){
+                ev[key2].title = ev[key2].title.replace(/\w+[.!?]?$/, '')
+                ev[key2].start = ev[key].start
+                ev.splice(key, 1)
+            }
+        }
     }
-    return true;
-  });
+  }
+  return ev
 }
 
 const aine = async (ainekood) => {
@@ -70,74 +55,51 @@ const aine = async (ainekood) => {
 }
 
 module.exports = async(icsData, id) => {
-  const array = [];
-  let currentObj = {};
+  const icsObject = ical.parseICS(icsData);
+  // Get the done and highlight info from the file
   const info = JSON.parse(getdone(id));
-  const done = info.done
-  const highlight = info.highlight
+  const done = info.done;
+  const highlight = info.highlight;
+
+  // Initialize arrays
+  const events = [];
   const isdone = [];
   const ishigh = [];
-  const lines = icsData.replace(LINEFIX, '').match(new RegExp(`(${wantedicsparm}+:).+?(?=${allicsparm}.+:)`, "gm"));
-  lines.push("END:VEVENT");
-  let ainenim = "";
-  let title = "";
+  // Iterate over the values of the icsObject and extract the events
+  for (const event of Object.values(icsObject)) {
+    
+    if (event.type === "VEVENT") {
+      console.log(event)
+      // Create a new event object with the desired properties
+      const newEvent = {
+        id: event.uid,
+        start: event.start.toISOString(),
+        end: event.end.toISOString(),
+        title: event.summary,
+        [exprops]: { status: "", color: "" },
+      };
 
-  for (let i = 0, iLen = lines.length; i < iLen; ++i) {
-    const line = lines[i];
-    const lineData = line.split(":");
-    let key = lineData[0];
-    let value = lineData.slice(1).join(":");
-
-    if (key.indexOf(";") !== -1) {
-      const keyParts = key.split(";");
-      key = keyParts[0];
-    }
-
-    switch (key) {
-      case EVENT_START:
-        if (value === EVENT) currentObj = {};
-        break;
-      case EVENT_END:
-        if(ainenim != ""){
-          currentObj[keyMap[SUMMARY]] = ainenim + " - " + title;
-        }
-        else{
-          currentObj[keyMap[SUMMARY]] = title;
-        }
-        currentObj[exprops] = {"status": "", "color": ""}
-        ainenim = "";
-        title = "";
-        if (value === EVENT) array.push(currentObj);
-        break;
-      case START_DATE:
-        currentObj[keyMap[START_DATE]] = value;
-        break;
-      case END_DATE:
-        currentObj[keyMap[END_DATE]] = value;
-        break;
-      case SUMMARY:
-        title = value;
-        break;
-      case CATEGORIES:
-        ainenim = await aine(value);
-        break;
-      default:
-        continue;
+      // Get the course name from the categories property if it exists
+      if(event.categories){
+        const courseName = await aine(event.categories.toString());
+        newEvent.title = courseName + " - " + newEvent.title;
+      }
+      // Check if the event is done or highlighted and update the status and color accordingly
+      // Push the new event to the events array
+      events.push(newEvent);
     }
   }
-  const cleanarray = evjson(array)
-  let foundhighlight = ""
+  const cleanarray = evjson(events)
   for(let i = 0; i < cleanarray.length; i++){
-    if(done.includes(cleanarray[i].title)){
-      isdone.push(cleanarray[i].title)
-      cleanarray[i].extendedProps.status = 'done'
-    } 
-    else{
-      foundhighlight = highlight.find(high => high[0] === cleanarray[i].title)
-      if(foundhighlight){
-        ishigh.push(foundhighlight)
-        cleanarray[i].extendedProps.status = 'high'
-        cleanarray[i].extendedProps.color =  foundhighlight[1]
+    if (done.includes(cleanarray[i].id)) {
+      isdone.push(cleanarray[i].id);
+      cleanarray[i].extendedProps.status = "done";
+    } else {
+      const foundhighlight = highlight.find((high) => high[0] === cleanarray[i].id);
+      if (foundhighlight) {
+        ishigh.push(foundhighlight);
+        cleanarray[i].extendedProps.status = "high";
+        cleanarray[i].extendedProps.color = foundhighlight[1];
       }
     }
   }

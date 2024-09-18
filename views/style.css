@@ -154,10 +154,9 @@
 }
 
 .loader--hidden {
-  visibility: hidden;
+  display: none;
 }
 
-/* HTML: <div class="loader"></div> */
 .loader::after{
   content: "";
   width: 100px;
