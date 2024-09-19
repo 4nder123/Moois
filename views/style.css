@@ -227,33 +227,42 @@ input:checked + label:after {
   color: #bbbbbb;
   --fc-border-color: #3f3f3f;
   --fc-page-bg-color: #3f3f3f;
-  --fc-today-bg-color: 	rgba(75, 75, 75, 0.3);
-  
-  .fc-list-event{
-    --fc-list-event-hover-bg-color: rgba(100, 100, 100, 0.15); 
-  }
-
-  .fc-timegrid-event-harness .fc-event {
-    filter: brightness(70%);
-  }
-  .kodutooheader{
-    background: #121212;
-  }
-  .shadow{
-    color: #3f3f3f;
-  }
-  .tooltip {
-    color: #e6e6e6;
-    background: #3f3f3f;
-  }
-  .modal-body, .fc-list-empty, .fc-list-day-cushion{
-    background: #242424;
-  }
-  .pv-select, .modal-input{
-    color:#bbbbbb;
-    background: #3d3d3d;
-  }
+  --fc-today-bg-color: rgba(75, 75, 75, 0.3);
 }
+
+.dark-mode .fc-list-event {
+  --fc-list-event-hover-bg-color: rgba(100, 100, 100, 0.15);
+}
+
+.dark-mode .fc-timegrid-event-harness .fc-event {
+  filter: brightness(70%);
+}
+
+.dark-mode .kodutooheader {
+  background: #121212;
+}
+
+.dark-mode .shadow {
+  color: #3f3f3f;
+}
+
+.dark-mode .tooltip {
+  color: #e6e6e6;
+  background: #3f3f3f;
+}
+
+.dark-mode .modal-body,
+.dark-mode .fc-list-empty,
+.dark-mode .fc-list-day-cushion {
+  background: #242424;
+}
+
+.dark-mode .pv-select,
+.dark-mode .modal-input {
+  color: #bbbbbb;
+  background: #3d3d3d;
+}
+
 
 .highlight-btn{
   width: 0;
