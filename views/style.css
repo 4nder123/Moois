@@ -234,7 +234,8 @@ input:checked + label:after {
   --fc-list-event-hover-bg-color: rgba(100, 100, 100, 0.15);
 }
 
-.dark-mode .fc-timegrid-event-harness .fc-event {
+.dark-mode .fc-timegrid-event-harness,
+.dark-mode .fc-daygrid-event-harness {
   filter: brightness(70%);
 }
 
