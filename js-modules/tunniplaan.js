@@ -40,17 +40,27 @@ function loadTunniplaan(ois){
             url: '/getevents?calurl='+ois,
             format: 'ics',
         },
+        eventSourceSuccess: function(content, response) {
+            let allday = false;
+            for (let i = 0; i< content.length; i++) {
+                if(content[i].start.split("T").pop() === "00:00:00"){
+                    content[i]["allDay"] = true;
+                    calendar.setOption("allDaySlot", true);
+                    allday = true;
+                }
+            }
+            if(!allday) {calendar.setOption("allDaySlot", false);}
+        },
         eventDidMount: function(info) {
-            console.log(info.event.title)
             if(info.event.extendedProps.organizer){
                 info.event.setProp("color", info.event.extendedProps.organizer);
             }
 
             if(info.event.extendedProps.description || info.event.extendedProps.location){
-                const description = (info.event.extendedProps.description ? info.event.extendedProps.description+"<br>" : "") 
-                + (info.event.extendedProps.location ? info.event.extendedProps.location : "");
+                const description = (info.event.extendedProps.description ? info.event.extendedProps.description.trim() + "<br>" : "") 
+                + (info.event.extendedProps.location ? info.event.extendedProps.location.trim() : "");
                 var tooltip = new bootstrap.Tooltip(info.el, {
-                    title: description.replace(new RegExp(`(\\n)+`, 'gm'), "<br>").replace(/\\n/gm,''),
+                    title: description.replace(new RegExp(`(\\n)+`, 'gm'), "<br>"),
                     placement: 'top',
                     trigger: 'manual',
                     html: true,
@@ -76,6 +86,7 @@ function loadTunniplaan(ois){
         },
         lazyFetching: true,
         progressiveEventRendering: true,
+        defaultAllDayEventDuration:{ days: 5 },
         eventTextColor: 'black',
         headerToolbar: {
             left: 'prev,next today',

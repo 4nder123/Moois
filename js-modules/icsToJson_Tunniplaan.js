@@ -20,6 +20,8 @@ const color = function(Category){
       return "#ffab88"
     case "kollokvium":
       return "#ff5252";
+    default:
+      return "#5089ee";
   }
 }
 module.exports = function(icsData){  

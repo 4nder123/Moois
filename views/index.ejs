@@ -41,6 +41,10 @@
                 tunniplaan.updateSize();
             })
 
+            kodutooButton.addEventListener("click", function(){
+                kodutoo.refetchEvents();
+            })
+
             document.addEventListener('visibilitychange', function(info){
                 if(document.visibilityState ==='visible'){
                     if(window.name === 'tunniplaan'){

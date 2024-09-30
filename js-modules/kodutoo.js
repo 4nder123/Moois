@@ -58,6 +58,16 @@ function loadKodutoo(moodle) {
     const calendar = new Calendar(calendarEl, {
         plugins: [ listPlugin ],
         customButtons: {
+            trash: {
+                click: function() {
+                    
+                }
+            },
+            add_event: {
+                click: function() {
+                    
+                }
+            },
             tunniplaan: {
                 text: 'Tunniplaan',
                 click: function() {
@@ -172,12 +182,14 @@ function loadKodutoo(moodle) {
         headerToolbar: {
             left: 'prev,next',
             center: '',
-            right: 'tunniplaan settings'
+            right: 'add_event trash tunniplaan settings'
         }
     });
     calendar.render()
     document.getElementById('kodutoo').querySelector(".fc-header-toolbar").classList.add("kodutooheader");
     document.getElementById('kodutoo').getElementsByClassName("fc-view-harness")[0].style = "top: 55px;" ;
+    document.getElementById('kodutoo').getElementsByClassName("fc-trash-button")[0].innerHTML = '<i class="fa fa-trash"></i>';
+    document.getElementById('kodutoo').getElementsByClassName("fc-add_event-button")[0].innerHTML = '<i class="fa fa-plus"></i>';
     document.getElementById('kodutoo').getElementsByClassName("fc-settings-button")[0].innerHTML = '<i class="fa fa-gear"></i>';
     socket.on('updateUserData', (id, action) => {
         const eventId = calendar.getEventById(typeof id === 'string'? id : id[0]);

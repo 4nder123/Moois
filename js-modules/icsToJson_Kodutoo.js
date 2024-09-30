@@ -69,7 +69,6 @@ module.exports = async(icsData, id) => {
   for (const event of Object.values(icsObject)) {
     
     if (event.type === "VEVENT") {
-      console.log(event)
       // Create a new event object with the desired properties
       const newEvent = {
         id: event.uid,
