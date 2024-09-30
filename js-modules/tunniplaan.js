@@ -86,7 +86,6 @@ function loadTunniplaan(ois){
         },
         lazyFetching: true,
         progressiveEventRendering: true,
-        defaultAllDayEventDuration:{ days: 5 },
         eventTextColor: 'black',
         headerToolbar: {
             left: 'prev,next today',

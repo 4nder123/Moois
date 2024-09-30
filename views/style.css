@@ -221,7 +221,15 @@ input:checked + label:after {
 .fc-list-table tbody tr th{
   column-span: 4;
 }
-
+.fc-timegrid-axis-frame.fc-scrollgrid-shrink-frame.fc-timegrid-axis-frame-liquid {
+  display: none;
+}
+.fc .fc-daygrid-body-natural .fc-daygrid-day-events {
+    margin-bottom: 1px;
+}
+.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events {
+  min-height: 0px;
+}
 .dark-mode {
   background-color: #121212;
   color: #bbbbbb;
