@@ -52,10 +52,10 @@ function loadTunniplaan(ois){
             if(!allday) {calendar.setOption("allDaySlot", false);}
         },
         eventDidMount: function(info) {
+            info.el.closest('div').style.zIndex = 1;
             if(info.event.extendedProps.organizer){
                 info.event.setProp("color", info.event.extendedProps.organizer);
             }
-
             if(info.event.extendedProps.description || info.event.extendedProps.location){
                 const description = (info.event.extendedProps.description ? info.event.extendedProps.description.trim() + "<br>" : "") 
                 + (info.event.extendedProps.location ? info.event.extendedProps.location.trim() : "");
