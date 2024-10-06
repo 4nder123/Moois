@@ -18,7 +18,7 @@ function loadTunniplaan(ois){
             },
             settings: {
                 click: function() {
-                    document.getElementById('my-modal').style.display='block';
+                    document.getElementById('settings').style.display='block';
                     if(localStorage.getItem("dark_mode") === "true"){
                         document.getElementById('switch').checked = true;
                     }
@@ -43,7 +43,7 @@ function loadTunniplaan(ois){
         eventSourceSuccess: function(content, response) {
             let allday = false;
             for (let i = 0; i< content.length; i++) {
-                if(content[i].start.split("T").pop() === "00:00:00"){
+                if(content[i].end.split("T").pop() <= "08:00:00"){
                     content[i]["allDay"] = true;
                     calendar.setOption("allDaySlot", true);
                     allday = true;

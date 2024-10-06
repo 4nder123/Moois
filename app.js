@@ -71,10 +71,10 @@ const job = nodeCron.schedule("0 0 0 * * *", () => {
             try {
                 return JSON.parse(fs.readFileSync(filePath));
             } catch (error) {
-                return { done: [], highlight: [] };
+                return { done: [], highlight: [], events: [] };
             }
         }
-        return { done: [], highlight: [] };
+        return { done: [], highlight: [], events: [] };
     };
 
     const writeFileData = (data) => {
@@ -104,6 +104,14 @@ const job = nodeCron.schedule("0 0 0 * * *", () => {
             info.highlight.push(reqInfo);
             break;
         case "high-remove":
+            info.highlight = info.highlight.filter(high => high[0] !== reqInfo);
+            break;
+        case "event-add":
+            info.events.push(reqInfo);
+            break;
+        case "event-remove":
+            info.events = info.events.filter(event => event.id !== reqInfo);
+            info.done = info.done.filter(done => done !== reqInfo);
             info.highlight = info.highlight.filter(high => high[0] !== reqInfo);
             break;
         default:

@@ -2,6 +2,7 @@ const axios = require('axios')
 const fs = require('fs')
 const path = require('path');
 const ical = require("node-ical");
+const moment = require('moment');
 
 const exprops = "extendedProps";
 
@@ -12,7 +13,7 @@ const getdone = function(id){
         return fs.readFileSync(path.join(__dirname, '../database/user-saved-info/'+id+'.json')).toString()
     }
     else{
-        return '{"done": [], "highlight":[]}'
+        return '{"done": [], "highlight":[], "events:[]"}'
     }
 }
 
@@ -60,7 +61,7 @@ module.exports = async(icsData, id) => {
   const info = JSON.parse(getdone(id));
   const done = info.done;
   const highlight = info.highlight;
-
+  const user_events = info.events.filter(event => moment().diff(event.start, "days") <= 7);
   // Initialize arrays
   const events = [];
   const isdone = [];
@@ -88,7 +89,7 @@ module.exports = async(icsData, id) => {
       events.push(newEvent);
     }
   }
-  const cleanarray = evjson(events)
+  const cleanarray = evjson(events).concat(JSON.parse(JSON.stringify(user_events)));
   for(let i = 0; i < cleanarray.length; i++){
     if (done.includes(cleanarray[i].id)) {
       isdone.push(cleanarray[i].id);
@@ -104,7 +105,7 @@ module.exports = async(icsData, id) => {
   }
   
   if(fs.existsSync(path.join(__dirname, '../database/user-saved-info/'+id+'.json'))){
-    fs.writeFileSync(path.join(__dirname, '../database/user-saved-info/'+id+'.json'),JSON.stringify({"done":isdone, "highlight":ishigh}))
+    fs.writeFileSync(path.join(__dirname, '../database/user-saved-info/'+id+'.json'),JSON.stringify({"done":isdone, "highlight":ishigh, "events":user_events}))
   }
   return cleanarray;
 };

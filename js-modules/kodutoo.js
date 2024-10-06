@@ -9,8 +9,13 @@ const save = "ev-save"
 const rm = "ev-remove"
 const high_save = "high-save"
 const high_rm = "high-remove"
+const event_remove = "event-remove"
+const event_add = "event-add"
 let color = localStorage.getItem('high') || "rgb(255, 255, 0, 0.25)";
-const highlightButton = "<div id='highlight' style='display:table-cell;text-align:right;vertical-align:middle;height:100%;padding-left:10px;' data-long-press-delay='500'><i id='highlight' class='fa-solid fa-highlighter fa-lg'></i></div>"
+const highlightButton = "<div id='highlight' class='event_button' data-long-press-delay='500'><i id='highlight' class='fa-solid fa-highlighter fa-lg'></i></div>"
+const deleteButton = "<div id='delete' class='event_button'><i id='delete' style='color:red;' class='fa fa-trash'></i></div>"
+let deleteSelected = false;
+
 const socket = io.connect('http://localhost:3000',{
     reconnection: true,
     reconnectionAttempts: Infinity,
@@ -52,6 +57,21 @@ function highlightEvent(event_id, color){
     eventRow.style.backgroundColor = color;
 }
 
+function userEventDelete(event, eventTitleElement){
+    if (event.extendedProps.status === "done") {
+        eventTitleElement.innerHTML = `<div class='event_title'><s>${event.title}</s></div>${deleteButton}`;
+    } else {
+        eventTitleElement.innerHTML = `<div class='event_title'>${event.title}</div>${deleteButton}`;
+    }
+}
+
+function setupEvent(event, eventTitleElement){
+    if (event.extendedProps.status === "done") {
+        eventTitleElement.innerHTML = `<div class='event_title'><s>${event.title}</s></div>`;
+    } else {
+        eventTitleElement.innerHTML = `<div class='event_title'>${event.title}</div>${highlightButton}`;
+    }
+}
 
 function loadKodutoo(moodle) {
     const calendarEl = document.getElementById('kodutoo');
@@ -60,12 +80,18 @@ function loadKodutoo(moodle) {
         customButtons: {
             trash: {
                 click: function() {
-                    
+                    if(!deleteSelected) {
+                        document.getElementById('kodutoo').getElementsByClassName("fc-trash-button")[0].innerHTML = '<i class="fa fa-check"></i>';
+                        deleteSelected = true;
+                    } else {
+                        document.getElementById('kodutoo').getElementsByClassName("fc-trash-button")[0].innerHTML = '<i class="fa fa-trash"></i>';
+                        deleteSelected = false;
+                    }
                 }
             },
             add_event: {
                 click: function() {
-                    
+                    document.getElementById('add').style.display='block';
                 }
             },
             tunniplaan: {
@@ -78,7 +104,7 @@ function loadKodutoo(moodle) {
             },
             settings: {
                 click: function() {
-                    document.getElementById('my-modal').style.display='block';
+                    document.getElementById('settings').style.display='block';
                     if(localStorage.getItem("dark_mode") === "true"){
                         document.getElementById('switch').checked = true;
                     }
@@ -95,15 +121,23 @@ function loadKodutoo(moodle) {
             const eventId = info.event.id;
             let tooltip = null;
             let longpress = false;
-            
+            if(event.extendedProps.userAdded){
+                document.getElementById('kodutoo').getElementsByClassName("fc-trash-button")[0].addEventListener('click', (e)=>{
+                    if(deleteSelected){
+                        userEventDelete(event, info.el.getElementsByClassName('event')[0])
+                    } else {
+                        setupEvent(event, info.el.getElementsByClassName('event')[0])
+                    }
+                });
+            }
             const handleClick = function (e) {
               const targetId = e.target.id;
               const isDone = event.extendedProps.status === "done"
               const isHigh = event.extendedProps.status === "high"
               if (info.el.contains(e.target)) {
-                if (!isDone && targetId !== 'highlight') {
+                if (!isDone && targetId !== 'highlight' && targetId !== "delete") {
                   savetodb(eventId, save);
-                  setExProps(event, "done", "") 
+                  setExProps(event, "done", "" && targetId !== "delete") 
                 } else if (isDone && targetId !== 'highlight') {
                   savetodb(eventId, rm);
                   setExProps(event, "", "") 
@@ -113,6 +147,11 @@ function loadKodutoo(moodle) {
                 } else if (isHigh && targetId === 'highlight' && !longpress) {
                   savetodb(eventId, high_rm);
                   setExProps(event, "", "") 
+                } else if (targetId === "delete" && deleteSelected){
+                    if(confirm("Kas olete kindel, et soovite kustutada kodutöö: " + event.title + "?")){
+                        savetodb(eventId, event_remove);
+                        event.remove();
+                    }
                 }
               }
             };
@@ -160,12 +199,11 @@ function loadKodutoo(moodle) {
             let eventTitleElement = document.createElement('div');
             const eventTitle = info.event.title;
             eventTitleElement.setAttribute("id", info.event.id);
-            eventTitleElement.style.display =  "table";
-            eventTitleElement.style.width = "100%";
-            if (info.event.extendedProps.status === "done") {
-                eventTitleElement.innerHTML = `<a><s>${eventTitle}</s></a>`;
+            eventTitleElement.setAttribute("class", "event");
+            if(info.event.extendedProps.userAdded && deleteSelected){
+                userEventDelete(info.event, eventTitleElement);
             } else {
-                eventTitleElement.innerHTML = `<a>${eventTitle}</a>${highlightButton}`;
+                setupEvent(info.event, eventTitleElement);
             }
             let arrayOfDomNodes = [ eventTitleElement ];
             return { domNodes: arrayOfDomNodes };
@@ -173,6 +211,22 @@ function loadKodutoo(moodle) {
         loading: function(isLoading){
             if(!isLoading){
                 document.querySelector(".loader").classList.add("loader--hidden")
+            }
+        },
+        eventsSet: function(info) {
+            if(info.length === 0) return;
+            const trash_button = document.getElementById('kodutoo').getElementsByClassName("fc-trash-button")[0]
+            const isUserEvents = info.filter((event) => {
+                if(event.extendedProps.userAdded){
+                    return true;
+                }
+            });
+            if(isUserEvents.length > 0 && trash_button.style.display === 'none'){
+                trash_button.style.display = '';
+            } else if(isUserEvents.length <= 0 && trash_button.style.display !== 'none'){
+                deleteSelected = false;
+                trash_button.innerHTML = '<i class="fa fa-trash"></i>';
+                trash_button.style.display = 'none';
             }
         },
         lazyFetching: true,
@@ -191,21 +245,27 @@ function loadKodutoo(moodle) {
     document.getElementById('kodutoo').getElementsByClassName("fc-trash-button")[0].innerHTML = '<i class="fa fa-trash"></i>';
     document.getElementById('kodutoo').getElementsByClassName("fc-add_event-button")[0].innerHTML = '<i class="fa fa-plus"></i>';
     document.getElementById('kodutoo').getElementsByClassName("fc-settings-button")[0].innerHTML = '<i class="fa fa-gear"></i>';
-    socket.on('updateUserData', (id, action) => {
-        const eventId = calendar.getEventById(typeof id === 'string'? id : id[0]);
-        if(eventId){
-            if (action === save) {
-                setExProps(eventId, "done", "")
-            } else if (action === high_save){
-                setExProps(eventId, "high", id[1])          
-            } else {
-                setExProps(eventId, "", "")
+    socket.on('updateUserData', (info, action) => {
+        if(action !== event_add){
+            const event = calendar.getEventById(typeof info === 'string'? info : info[0]);
+            if(event){
+                if (action === save) {
+                    setExProps(event, "done", "");
+                } else if (action === high_save){
+                    setExProps(event, "high", info[1]);   
+                }else if (action === event_remove) {
+                    event.remove();      
+                } else {
+                    setExProps(event, "", "");
+                } 
+            } else if(action !== event_remove){
+                calendar.refetchEvents();
             }
-        } else {
-            calendar.refetchEvents();
+        } else if(!calendar.getEventById(info.id)){
+             calendar.addEvent(info, true);
         }
     });
     return calendar
 }
 
-export default loadKodutoo;
+export { loadKodutoo, savetodb };
