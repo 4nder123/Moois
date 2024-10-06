@@ -13,7 +13,7 @@ const getdone = function(id){
         return fs.readFileSync(path.join(__dirname, '../database/user-saved-info/'+id+'.json')).toString()
     }
     else{
-        return '{"done": [], "highlight":[], "events:[]"}'
+        return '{"done": [], "highlight":[], "events":[]}'
     }
 }
 
