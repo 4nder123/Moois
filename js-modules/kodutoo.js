@@ -73,6 +73,14 @@ function setupEvent(event, eventTitleElement){
     }
 }
 
+function updateVisableRange(events, calendar) {
+    const dates = events.map(event => new Date(new Date(event.start).toISOString().split('T')[0]));
+    const minDate = new Date(Math.min(...dates));
+    let maxDate = new Date(Math.max(...dates));
+    maxDate.setDate(maxDate.getDate() + 2);
+    calendar.setOption('visibleRange', {start: minDate.toISOString().split('T')[0], end: maxDate.toISOString().split('T')[0]});
+}
+
 function loadKodutoo(moodle) {
     const calendarEl = document.getElementById('kodutoo');
     const calendar = new Calendar(calendarEl, {
@@ -111,6 +119,11 @@ function loadKodutoo(moodle) {
                 }
             }
         },
+        views: {
+            kodutood: {
+              type: 'list'
+            }, 
+        },
         locale: etLocale,
         defaultTimedEventDuration: 0,
         events: {
@@ -148,10 +161,8 @@ function loadKodutoo(moodle) {
                   savetodb(eventId, high_rm);
                   setExProps(event, "", "") 
                 } else if (targetId === "delete" && deleteSelected){
-                    if(confirm("Kas olete kindel, et soovite kustutada kodutöö: " + event.title + "?")){
-                        savetodb(eventId, event_remove);
-                        event.remove();
-                    }
+                    savetodb(eventId, event_remove);
+                    event.remove();
                 }
               }
             };
@@ -215,7 +226,8 @@ function loadKodutoo(moodle) {
         },
         eventsSet: function(info) {
             if(info.length === 0) return;
-            const trash_button = document.getElementById('kodutoo').getElementsByClassName("fc-trash-button")[0]
+            updateVisableRange(info, calendar);
+            const trash_button = document.getElementById('kodutoo').getElementsByClassName("fc-trash-button")[0];
             const isUserEvents = info.filter((event) => {
                 if(event.extendedProps.userAdded){
                     return true;
@@ -232,9 +244,9 @@ function loadKodutoo(moodle) {
         lazyFetching: true,
         progressiveEventRendering: true,
         contentHeight: "auto",
-        initialView: 'listYear',
+        initialView: 'kodutood',
         headerToolbar: {
-            left: 'prev,next',
+            left: '',
             center: '',
             right: 'add_event trash tunniplaan settings'
         }
