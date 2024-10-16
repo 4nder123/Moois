@@ -153,7 +153,7 @@
       font-size: 3.2vmin;
   }
   .event_button {
-      padding: 10px 0px 10px 10px;
+      padding: 11px 0px 11px 10px;
   }
 }
 @media (max-width: 715px) {
@@ -432,4 +432,11 @@ input:checked + label[for="switch"]:after {
 .event_button {
   display: flex;
   align-items: center;
+}
+
+.event_button i{
+  display: flex;
+  align-items: center;
+  height: 1px;
+  
 }
