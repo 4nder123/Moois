@@ -146,12 +146,14 @@
       font-size: 3.2vmin;
       
   }
-
   .tunniplaan .fc-header-toolbar .fc-toolbar-chunk {
       font-size: 3.2vmin;
   }
   .tunniplaan .fc-settings-button .fa-gear{
       font-size: 3.2vmin;
+  }
+  .event_button {
+      padding: 10px;
   }
 }
 @media (max-width: 715px) {
@@ -430,5 +432,4 @@ input:checked + label[for="switch"]:after {
 .event_button {
   display: flex;
   align-items: center;
-  padding-left: 10px;
 }
