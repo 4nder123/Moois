@@ -153,7 +153,8 @@
       font-size: 3.2vmin;
   }
   .event_button {
-      padding: 11px 0px 11px 10px;
+      margin-right: 0px !important;
+      padding: 11px 14px 11px 10px;
   }
 }
 @media (max-width: 715px) {
@@ -426,17 +427,21 @@ input:checked + label[for="switch"]:after {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
+  padding: 8px 0px 8px 14px;
   gap:10px;
 }
 
 .event_button {
   display: flex;
   align-items: center;
+  margin-right: 14px;
 }
 
 .event_button i{
   display: flex;
   align-items: center;
   height: 1px;
-  
+}
+td.fc-list-event-title {
+  padding: 0px 0px 0px 0px !important;
 }
