@@ -154,7 +154,7 @@
   }
   .event_button {
       margin-right: 0px !important;
-      padding: 11px 14px 11px 10px;
+      padding: 0px 14px 0px 10px;
   }
 }
 @media (max-width: 715px) {
@@ -427,8 +427,11 @@ input:checked + label[for="switch"]:after {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  padding: 8px 0px 8px 14px;
   gap:10px;
+}
+
+.event_title {
+  padding: 8px 0px 8px 14px;
 }
 
 .event_button {
