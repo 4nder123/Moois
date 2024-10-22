@@ -86,18 +86,16 @@ function updateVisibleRange(events, calendar) {
 }
 
 function checkOverflow() {
-    const docWidth = document.documentElement.offsetWidth;
+    const docWidth = document.documentElement.offsetWidth - 18;
     const tableEl = document.getElementsByClassName("fc-list-table")[0];
     var fontSize = parseInt(window.getComputedStyle(tableEl, null).getPropertyValue('font-size'));
-    if (tableEl.offsetWidth > (docWidth - 18)) {
-        if(tableEl.offsetWidth > crossover) {
-            crossover = tableEl.offsetWidth;
-        }
+    if (tableEl.offsetWidth > docWidth) {
+        crossover = Math.max(crossover, tableEl.offsetWidth);
         if(!tableEl.classList.contains("wrap")) {
             tableEl.classList.add("wrap");
         }
-        if (tableEl.offsetWidth > (docWidth - 18)) {
-            while (tableEl.offsetWidth > (docWidth - 18) && fontSize > 0) {
+        if (tableEl.offsetWidth > docWidth) {
+            while (tableEl.offsetWidth > docWidth && fontSize > 0) {
                 fontSize --;
                 tableEl.style.fontSize = fontSize + "px";
             }
@@ -106,18 +104,18 @@ function checkOverflow() {
         while (fontSize < 16) {
             fontSize++;
             tableEl.style.fontSize = fontSize + "px";
-            if(tableEl.offsetWidth > (docWidth - 18)) {
-                tableEl.style.fontSize = fontSize-1 + "px";
+            if(tableEl.offsetWidth > docWidth) {
+                fontSize--;
+                tableEl.style.fontSize = fontSize + "px";
                 break;
             }
             if(fontSize === 16) {
                 tableEl.removeAttribute("style");
             }
         }
-        if(tableEl.offsetWidth > crossover) {
-            if(tableEl.classList.contains("wrap")) {
-                tableEl.classList.remove("wrap");
-            }
+        if(tableEl.offsetWidth > crossover && tableEl.classList.contains("wrap")) {
+            tableEl.classList.remove("wrap");
+            crossover = 0;
         }
     }
 }
