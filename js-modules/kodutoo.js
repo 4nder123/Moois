@@ -73,7 +73,7 @@ function setupEvent(event, eventTitleElement){
     }
 }
 
-function updateVisableRange(events, calendar) {
+function updateVisibleRange(events, calendar) {
     const dates = events.map(event => new Date(new Date(event.start).toISOString().split('T')[0]));
     const minDate = new Date(Math.min(...dates));
     let maxDate = new Date(Math.max(...dates));
@@ -226,7 +226,7 @@ function loadKodutoo(moodle) {
         },
         eventsSet: function(info) {
             if(info.length === 0) return;
-            updateVisableRange(info, calendar);
+            updateVisibleRange(info, calendar);
             const trash_button = document.getElementById('kodutoo').getElementsByClassName("fc-trash-button")[0];
             const isUserEvents = info.filter((event) => {
                 if(event.extendedProps.userAdded){

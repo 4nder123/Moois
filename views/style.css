@@ -163,6 +163,18 @@
   }
 }
 
+@media (max-width:380px){
+  .fc-list-event-time {
+    white-space: normal !important;
+  }
+}
+
+@media (max-width:330px) {
+  .fc-list-table {
+    font-size: 4.7vmin !important;
+  }
+}
+
 .loader {
   position: fixed;
   top: 0;
@@ -241,9 +253,6 @@ input:checked + label[for="switch"]:after {
   --fc-list-event-hover-bg-color: rgb(0,0,0,0.05); 
 }
 
-.fc-list-table tbody tr th{
-  column-span: 4;
-}
 .fc-timegrid-axis-frame.fc-scrollgrid-shrink-frame.fc-timegrid-axis-frame-liquid {
   display: none;
 }
@@ -427,7 +436,6 @@ input:checked + label[for="switch"]:after {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  gap:10px;
 }
 
 .event_title {
