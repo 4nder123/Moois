@@ -143,14 +143,14 @@
 
 @media (max-width: 500px) {
   .tunniplaan .fc .fc-toolbar.fc-header-toolbar {
-      font-size: 3.2vmin;
+      font-size: 3.2vw;
       
   }
   .tunniplaan .fc-header-toolbar .fc-toolbar-chunk {
-      font-size: 3.2vmin;
+      font-size: 3.2vw;
   }
   .tunniplaan .fc-settings-button .fa-gear{
-      font-size: 3.2vmin;
+      font-size: 3.2vw;
   }
   .event_button {
       margin-right: 0px !important;
@@ -162,17 +162,8 @@
       display: none;
   }
 }
-
-@media (max-width:380px){
-  .fc-list-event-time {
-    white-space: normal !important;
-  }
-}
-
-@media (max-width:330px) {
-  .fc-list-table {
-    font-size: 4.7vmin !important;
-  }
+.fc-list-table.wrap .fc-list-event-time{
+  white-space: normal !important;
 }
 
 .loader {

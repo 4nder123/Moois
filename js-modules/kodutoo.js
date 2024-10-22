@@ -15,6 +15,8 @@ let color = localStorage.getItem('high') || "rgb(255, 255, 0, 0.25)";
 const highlightButton = "<div id='highlight' class='event_button' data-long-press-delay='500'><i id='highlight' class='fa-solid fa-highlighter fa-lg'></i></div>"
 const deleteButton = "<div id='delete' class='event_button'><i id='delete' style='color:red;' class='fa fa-trash'></i></div>"
 let deleteSelected = false;
+let crossover = 0;
+let evCount = 0;
 
 const socket = io.connect('http://localhost:3000',{
     reconnection: true,
@@ -58,18 +60,20 @@ function highlightEvent(event_id, color){
 }
 
 function userEventDelete(event, eventTitleElement){
+    const event_title = addWordBreaks(event.title);
     if (event.extendedProps.status === "done") {
-        eventTitleElement.innerHTML = `<div class='event_title'><s>${event.title}</s></div>${deleteButton}`;
+        eventTitleElement.innerHTML = `<div class='event_title'><s>${event_title}</s></div>${deleteButton}`;
     } else {
-        eventTitleElement.innerHTML = `<div class='event_title'>${event.title}</div>${deleteButton}`;
+        eventTitleElement.innerHTML = `<div class='event_title'>${event_title}</div>${deleteButton}`;
     }
 }
 
 function setupEvent(event, eventTitleElement){
+    const event_title = addWordBreaks(event.title);
     if (event.extendedProps.status === "done") {
-        eventTitleElement.innerHTML = `<div class='event_title'><s>${event.title}</s></div>`;
+        eventTitleElement.innerHTML = `<div class='event_title'><s>${event_title}</s></div>`;
     } else {
-        eventTitleElement.innerHTML = `<div class='event_title'>${event.title}</div>${highlightButton}`;
+        eventTitleElement.innerHTML = `<div class='event_title'>${event_title}</div>${highlightButton}`;
     }
 }
 
@@ -79,6 +83,54 @@ function updateVisibleRange(events, calendar) {
     let maxDate = new Date(Math.max(...dates));
     maxDate.setDate(maxDate.getDate() + 2);
     calendar.setOption('visibleRange', {start: minDate.toISOString().split('T')[0], end: maxDate.toISOString().split('T')[0]});
+}
+
+function checkOverflow() {
+    const docWidth = document.documentElement.offsetWidth;
+    const tableEl = document.getElementsByClassName("fc-list-table")[0];
+    var fontSize = parseInt(window.getComputedStyle(tableEl, null).getPropertyValue('font-size'));
+    if (tableEl.offsetWidth > (docWidth - 18)) {
+        if(tableEl.offsetWidth > crossover) {
+            crossover = tableEl.offsetWidth;
+        }
+        if(!tableEl.classList.contains("wrap")) {
+            tableEl.classList.add("wrap");
+        }
+        if (tableEl.offsetWidth > (docWidth - 18)) {
+            while (tableEl.offsetWidth > (docWidth - 18) && fontSize > 0) {
+                fontSize --;
+                tableEl.style.fontSize = fontSize + "px";
+            }
+        }
+    } else {
+        while (fontSize < 16) {
+            fontSize++;
+            tableEl.style.fontSize = fontSize + "px";
+            if(tableEl.offsetWidth > (docWidth - 18)) {
+                tableEl.style.fontSize = fontSize-1 + "px";
+                break;
+            }
+            if(fontSize === 16) {
+                tableEl.removeAttribute("style");
+            }
+        }
+        if(tableEl.offsetWidth > crossover) {
+            if(tableEl.classList.contains("wrap")) {
+                tableEl.classList.remove("wrap");
+            }
+        }
+    }
+}
+
+function removeEvent(event){
+    event.remove(); 
+    evCount--;
+    checkOverflow();
+}
+
+function addWordBreaks(str) {
+    const zeroWidthSpace = '<wbr>';
+    return str.replace(new RegExp(`(\\S{25})`, 'g'), `$1${zeroWidthSpace}`);
 }
 
 function loadKodutoo(moodle) {
@@ -132,6 +184,7 @@ function loadKodutoo(moodle) {
         eventDidMount: function(info) {
             const event = info.event;  
             const eventId = info.event.id;
+            evCount++;
             let tooltip = null;
             let longpress = false;
             if(event.extendedProps.userAdded){
@@ -162,7 +215,7 @@ function loadKodutoo(moodle) {
                   setExProps(event, "", "") 
                 } else if (targetId === "delete" && deleteSelected){
                     savetodb(eventId, event_remove);
-                    event.remove();
+                    removeEvent(event);
                 }
               }
             };
@@ -205,10 +258,12 @@ function loadKodutoo(moodle) {
             highlightEvent(eventId, event.extendedProps.color);
             info.el.addEventListener("click", handleClick);
             info.el.addEventListener('long-press', handleLongClick);
+            if(calendar.getEvents().length == evCount) {
+                checkOverflow();
+            }
         },
         eventContent: function(info) {
             let eventTitleElement = document.createElement('div');
-            const eventTitle = info.event.title;
             eventTitleElement.setAttribute("id", info.event.id);
             eventTitleElement.setAttribute("class", "event");
             if(info.event.extendedProps.userAdded && deleteSelected){
@@ -223,6 +278,9 @@ function loadKodutoo(moodle) {
             if(!isLoading){
                 document.querySelector(".loader").classList.add("loader--hidden")
             }
+        },
+        eventSourceSuccess: (content, response) => {
+            evCount = 0;
         },
         eventsSet: function(info) {
             if(info.length === 0) return;
@@ -266,7 +324,7 @@ function loadKodutoo(moodle) {
                 } else if (action === high_save){
                     setExProps(event, "high", info[1]);   
                 }else if (action === event_remove) {
-                    event.remove();      
+                    removeEvent(event); 
                 } else {
                     setExProps(event, "", "");
                 } 
@@ -277,6 +335,7 @@ function loadKodutoo(moodle) {
              calendar.addEvent(info, true);
         }
     });
+    window.addEventListener('resize', checkOverflow);
     return calendar
 }
 
