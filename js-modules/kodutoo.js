@@ -128,7 +128,7 @@ function removeEvent(event){
 
 function addWordBreaks(str) {
     const zeroWidthSpace = '<wbr>';
-    return str.replace(new RegExp(`(\\S{25})`, 'g'), `$1${zeroWidthSpace}`);
+    return str.replace(new RegExp('(\\S{25})(?![&lt;&gt;])', 'g'), `$1${zeroWidthSpace}`);
 }
 
 function loadKodutoo(moodle) {
