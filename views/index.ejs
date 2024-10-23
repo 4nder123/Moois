@@ -77,15 +77,6 @@
                 timepicker = null;
             });
 
-            document.getElementById('add-button').addEventListener('click', () => {
-                if(document.getElementById('event-title').value !== "") {
-                    if(datepicker) datepicker.destroy();
-                    if(timepicker) datepicker.destroy();
-                    datepicker = null;
-                    timepicker = null;
-                }
-            });
-
             document.getElementById('datetimeadd').addEventListener('submit', function(event) {
                 event.preventDefault();
                 document.getElementById('add').style.display='none'
@@ -94,6 +85,10 @@
                 const date = document.getElementById('date').value;
                 const time = document.getElementById('time').value;
                 const datetime = date + "T" + time;
+                if(datepicker) datepicker.destroy();
+                if(timepicker) datepicker.destroy();
+                datepicker = null;
+                timepicker = null;
                 event.target.reset()
                 savetodb({id:id, title:title, start:datetime, extendedProps: {userAdded: 'true', status: "", color: ""}}, "event-add")
                 kodutoo.addEvent({id:id, title:title, start:datetime, extendedProps: {userAdded: 'true', status: "", color: ""}}, true);
@@ -174,7 +169,7 @@
             <div class="modal-body">
                 <form id="datetimeadd">
                     <p>Kodutöö pealkiri:</p>
-                    <input type="text" id="event-title" class="modal-input" placeholder="Sisesta pealkiri" autocomplete="off" required>
+                    <input type="text" id="event-title" class="modal-input" pattern="\S.*" placeholder="Sisesta pealkiri" autocomplete="off" required>
 
                     <p>Kuupäev:</p>
                     <div class="datetime-flex">
