@@ -78,17 +78,19 @@
             });
 
             document.getElementById('add-button').addEventListener('click', () => {
-                if(datepicker) datepicker.destroy();
-                if(timepicker) datepicker.destroy();
-                datepicker = null;
-                timepicker = null;
+                if(document.getElementById('event-title').value !== "") {
+                    if(datepicker) datepicker.destroy();
+                    if(timepicker) datepicker.destroy();
+                    datepicker = null;
+                    timepicker = null;
+                }
             });
 
             document.getElementById('datetimeadd').addEventListener('submit', function(event) {
                 event.preventDefault();
                 document.getElementById('add').style.display='none'
                 const id = self.crypto.randomUUID();
-                const title = document.getElementById('event-title').value;
+                const title = document.getElementById('event-title').value.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 const date = document.getElementById('date').value;
                 const time = document.getElementById('time').value;
                 const datetime = date + "T" + time;
