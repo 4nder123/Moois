@@ -95,7 +95,7 @@ function checkOverflow() {
             tableEl.classList.add("wrap");
         }
         if (tableEl.offsetWidth > docWidth) {
-            while (tableEl.offsetWidth > docWidth && fontSize > 0) {
+            while (tableEl.offsetWidth > docWidth && fontSize > 10) {
                 fontSize --;
                 tableEl.style.fontSize = fontSize + "px";
             }
@@ -104,7 +104,7 @@ function checkOverflow() {
         while (fontSize < 16) {
             fontSize++;
             tableEl.style.fontSize = fontSize + "px";
-            if(tableEl.offsetWidth > docWidth) {
+            if(tableEl.offsetWidth > docWidth && fontSize > 10) {
                 fontSize--;
                 tableEl.style.fontSize = fontSize + "px";
                 break;
