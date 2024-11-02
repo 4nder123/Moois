@@ -5,10 +5,9 @@ const ical = require("node-ical");
 const moment = require('moment');
 
 const exprops = "extendedProps";
-
 const ainekoodid = {}
 
-const getdone = function(id){
+const getEventData = function(id){
     if (fs.existsSync(path.join(__dirname, '../database/user-saved-info/'+id+'.json'))) {
         return fs.readFileSync(path.join(__dirname, '../database/user-saved-info/'+id+'.json')).toString()
     }
@@ -17,60 +16,42 @@ const getdone = function(id){
     }
 }
 
-const evjson = function(ev){
-  for(var key in ev){
-    for(var key2 in ev){
-        if(key!=key2){
-            if(ev[key].title.replace(/\w+[.!?]?$/, '')==ev[key2].title.replace(/\w+[.!?]?$/, '') && ev[key].start.slice(0,-13) == ev[key2].start.slice(0,-13)){
-                ev[key2].title = ev[key2].title.replace(/\w+[.!?]?$/, '')
-                ev[key2].start = ev[key].start
-                ev.splice(key, 1)
-            }
-        }
+const getAine = async (ainekood) => {
+    if(ainekood in ainekoodid) return ainekoodid[ainekood];
+    const validAinekood = ainekood.match(/^[A-Z, 0-9]+[.][0-9]+[.][0-9]+/);
+    if(validAinekood) {
+      try {
+        const aineNimi = await axios.get("https://ois2.ut.ee/api/courses/"+ validAinekood.toString());
+        const aineJson = aineNimi.data;
+        ainekoodid[ainekood] = aineJson["title"]["et"];
+        return aineJson["title"]["et"];
+      } catch {
+        console.log("API päring ebaõnnestus:", error);
+      }
     }
+    return (ainekoodid[ainekood] = ainekood);
+}
+
+const updateUserInfo = async function(id, isDone, isHigh, userEvents) {
+  const filePath = path.join(__dirname, '../database/user-saved-info/', `${id}.json`);
+  if (fs.existsSync(filePath)) {
+      const userData = JSON.stringify({
+          done: isDone,
+          highlight: isHigh,
+          events: userEvents,
+      });
+      try {
+          await fs.promises.writeFile(filePath, userData);
+      } catch (error) {
+          console.log('Error writing to file:', error);
+      }
   }
-  return ev
 }
 
-const aine = async (ainekood) => {
-    if(ainekood in ainekoodid){
-      return ainekoodid[ainekood];
-    }
-    else{
-      try{
-        let ainekoodmatch = ainekood.match(/^[A-Z, 0-9]+[.][0-9]+[.][0-9]+/)
-        if(ainekoodmatch !== null){
-          const aine = await axios.get("https://ois2.ut.ee/api/courses/"+ ainekoodmatch.toString())
-          const ainejson = aine.data
-          ainekoodid[ainekood] = ainejson["title"]["et"]
-          return ainejson["title"]["et"]
-        }
-        else{
-          return ainekood
-        }
-      }
-      catch{
-        return ainekood
-      }
-    }
-}
-
-module.exports = async(icsData, id) => {
-  const icsObject = ical.parseICS(icsData);
-  // Get the done and highlight info from the file
-  const info = JSON.parse(getdone(id));
-  const done = info.done;
-  const highlight = info.highlight;
-  const user_events = info.events.filter(event => moment().diff(event.start, "days") <= 7);
-  // Initialize arrays
-  const events = [];
-  const isdone = [];
-  const ishigh = [];
-  // Iterate over the values of the icsObject and extract the events
+const processEvents = async function(icsObject) {
+  const eventMap = new Map();
   for (const event of Object.values(icsObject)) {
-    
     if (event.type === "VEVENT") {
-      // Create a new event object with the desired properties
       const newEvent = {
         id: event.uid,
         start: event.start.toISOString(),
@@ -79,33 +60,53 @@ module.exports = async(icsData, id) => {
         [exprops]: { status: "", color: "" },
       };
 
-      // Get the course name from the categories property if it exists
       if(event.categories){
-        const courseName = await aine(event.categories.toString());
+        const courseName = await getAine(event.categories.toString());
         newEvent.title = courseName + " - " + newEvent.title;
       }
-      // Check if the event is done or highlighted and update the status and color accordingly
-      // Push the new event to the events array
-      events.push(newEvent);
-    }
-  }
-  const cleanarray = evjson(events).concat(JSON.parse(JSON.stringify(user_events)));
-  for(let i = 0; i < cleanarray.length; i++){
-    if (done.includes(cleanarray[i].id)) {
-      isdone.push(cleanarray[i].id);
-      cleanarray[i].extendedProps.status = "done";
-    } else {
-      const foundhighlight = highlight.find((high) => high[0] === cleanarray[i].id);
-      if (foundhighlight) {
-        ishigh.push(foundhighlight);
-        cleanarray[i].extendedProps.status = "high";
-        cleanarray[i].extendedProps.color = foundhighlight[1];
+
+      const key = newEvent.start.slice(0,-13);
+      if(!eventMap.has(key)) {
+        eventMap.set(key, [newEvent]);
+      } else {
+        const title = newEvent.title.replace(/\w+[.!?]?$/, '');
+        const duplicateEvent = eventMap.get(key).find(event => event.title.replace(/\w+[.!?]?$/, '') === title);
+        if(duplicateEvent) {
+          duplicateEvent.title = title;
+          duplicateEvent.end = newEvent.start;
+        } else {
+          eventMap.get(key).push(newEvent);
+        }
       }
     }
   }
-  
-  if(fs.existsSync(path.join(__dirname, '../database/user-saved-info/'+id+'.json'))){
-    fs.writeFileSync(path.join(__dirname, '../database/user-saved-info/'+id+'.json'),JSON.stringify({"done":isdone, "highlight":ishigh, "events":user_events}))
-  }
-  return cleanarray;
+  return Array.from(eventMap.values()).flat();
+}
+
+module.exports = async(icsData, id) => {
+  const icsObject = ical.parseICS(icsData);
+  const evData = JSON.parse(getEventData(id));
+  const done = new Set(evData.done);
+  const highlight = new Map(evData.highlight.map(([id, color]) => [id, color]));
+  const userEvents = evData.events.filter(event => moment().diff(event.start, "days") <= 5);
+
+  const events = (await processEvents(icsObject)).concat(JSON.parse(JSON.stringify(userEvents)));
+  const isDone = [];
+  const isHigh = [];
+  events.forEach(event => {
+    const { id, extendedProps } = event;
+    if (done.has(id)) {
+        isDone.push(id);
+        extendedProps.status = "done";
+    } else {
+        if (highlight.has(id)) {
+            const color = highlight.get(id);
+            extendedProps.status = "high";
+            extendedProps.color = color;
+            isHigh.push([id, color]);
+        }
+    }
+  });
+  updateUserInfo(id, isDone, isHigh, userEvents);
+  return events;
 };
