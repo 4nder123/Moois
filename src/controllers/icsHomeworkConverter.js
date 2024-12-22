@@ -1,52 +1,27 @@
 const axios = require('axios')
-const fs = require('fs')
-const path = require('path');
 const ical = require("node-ical");
 const moment = require('moment');
+const { getUserEventData, updateUserEventData } = require('./database')
 
-const exprops = "extendedProps";
-const ainekoodid = {}
+const exProps = "extendedProps";
+const courseIds = {};
 
-const getEventData = function(id){
-    if (fs.existsSync(path.join(__dirname, '../database/user-saved-info/'+id+'.json'))) {
-        return fs.readFileSync(path.join(__dirname, '../database/user-saved-info/'+id+'.json')).toString()
+const getCourse = async (courseId) => {
+    if (courseId in courseIds) return courseIds[courseId];
+    const validCourseId = courseId.match(/^[A-Z, 0-9]+[.][0-9]+[.][0-9]+/);
+    if (validCourseId) {
+        try {
+            const courseName = await axios.get("https://ois2.ut.ee/api/courses/" + validCourseId.toString());
+            const courseJson = courseName.data;
+            courseIds[courseId] = courseJson["title"]["et"];
+            return courseJson["title"]["et"];
+        } catch (error) {
+            console.log("API request failed:", error);
+        }
     }
-    else{
-        return '{"done": [], "highlight":[], "events":[]}'
-    }
-}
+    return (courseIds[courseId] = courseId);
+};
 
-const getAine = async (ainekood) => {
-    if(ainekood in ainekoodid) return ainekoodid[ainekood];
-    const validAinekood = ainekood.match(/^[A-Z, 0-9]+[.][0-9]+[.][0-9]+/);
-    if(validAinekood) {
-      try {
-        const aineNimi = await axios.get("https://ois2.ut.ee/api/courses/"+ validAinekood.toString());
-        const aineJson = aineNimi.data;
-        ainekoodid[ainekood] = aineJson["title"]["et"];
-        return aineJson["title"]["et"];
-      } catch {
-        console.log("API päring ebaõnnestus:", error);
-      }
-    }
-    return (ainekoodid[ainekood] = ainekood);
-}
-
-const updateUserInfo = async function(id, isDone, isHigh, userEvents) {
-  const filePath = path.join(__dirname, '../database/user-saved-info/', `${id}.json`);
-  if (fs.existsSync(filePath)) {
-      const userData = JSON.stringify({
-          done: isDone,
-          highlight: isHigh,
-          events: userEvents,
-      });
-      try {
-          await fs.promises.writeFile(filePath, userData);
-      } catch (error) {
-          console.log('Error writing to file:', error);
-      }
-  }
-}
 
 const processEvents = async function(icsObject) {
   const eventMap = new Map();
@@ -57,11 +32,11 @@ const processEvents = async function(icsObject) {
         start: event.start.toISOString(),
         end: event.end.toISOString(),
         title: event.summary,
-        [exprops]: { status: "", color: "" },
+        [exProps]: { status: "", color: "" },
       };
 
       if(event.categories){
-        const courseName = await getAine(event.categories.toString());
+        const courseName = await getCourse(event.categories.toString());
         newEvent.title = courseName + " - " + newEvent.title;
       }
 
@@ -85,7 +60,7 @@ const processEvents = async function(icsObject) {
 
 module.exports = async(icsData, id) => {
   const icsObject = ical.parseICS(icsData);
-  const evData = JSON.parse(getEventData(id));
+  const evData = JSON.parse(getUserEventData(id));
   const done = new Set(evData.done);
   const highlight = new Map(evData.highlight.map(([id, color]) => [id, color]));
   const userEvents = evData.events.filter(event => moment().diff(event.start, "days") <= 5);
@@ -107,6 +82,6 @@ module.exports = async(icsData, id) => {
         }
     }
   });
-  updateUserInfo(id, isDone, isHigh, userEvents);
+  updateUserEventData(id, isDone, isHigh, userEvents);
   return events;
 };
