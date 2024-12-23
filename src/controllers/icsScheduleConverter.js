@@ -1,5 +1,6 @@
 const ical = require("node-ical");
 const moment = require('moment');
+const { RRule } = require('rrule');
 
 const getColor = function(Category){
   switch(Category){
@@ -34,7 +35,7 @@ const convertDuration = (duration) => {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 };
 
-module.exports = function(icsData) {
+const getEvents = (icsData) => {
   const icsObject = ical.parseICS(icsData);
   const events = Object.values(icsObject)
     .filter(event => event.type === "VEVENT")
@@ -42,8 +43,7 @@ module.exports = function(icsData) {
       const start = moment(event.start);
       const end = moment(event.end);
       const duration = event.duration ? convertDuration(event.duration) : null;
-      const isAllDay = start.format('HH:mm') <= "08:00";
-      
+      const isAllDay = start.format('HH:mm') < "08:00";
       const exdates = event.exdate ? Object.values(event.exdate).map(exdate => moment(exdate).format('YYYY-MM-DDTHH:mm:ss')) : [];
 
       return {
@@ -64,4 +64,38 @@ module.exports = function(icsData) {
       };
     });
   return events;
+};
+
+const getWeekRange = (date) => {
+  const startOfWeek = moment(date).startOf("isoWeek");
+  const endOfWeek = moment(startOfWeek).add(6, "days");
+  const format = (d) => d.format("DD/MM/YYYY");
+  return `${format(startOfWeek)} - ${format(endOfWeek)}`;
+};
+
+module.exports = function(icsData) {
+  const events = getEvents(icsData);
+  const weeklyGroupedEvents = {};
+  events.forEach(event => {
+    if (event.rrule) {
+      const rule = new RRule(event.rrule);
+      const start = moment(event.rrule.dtstart).startOf("day").toDate();
+      const end = moment(event.rrule.until).endOf("day").toDate();
+      rule.between(start, end).forEach((occurrence) => {
+        const weekKey = getWeekRange(occurrence);
+        if (!weeklyGroupedEvents[weekKey]) {
+          weeklyGroupedEvents[weekKey] = [];
+        }
+        weeklyGroupedEvents[weekKey].push({ ...event });
+      });
+    } else {
+      const eventDate = new Date(event.start);
+      const weekKey = getWeekRange(eventDate);
+      if (!weeklyGroupedEvents[weekKey]) {
+        weeklyGroupedEvents[weekKey] = [];
+      }
+      weeklyGroupedEvents[weekKey].push(event);
+    }
+  });
+  return weeklyGroupedEvents;
 };
