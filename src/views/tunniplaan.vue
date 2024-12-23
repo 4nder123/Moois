@@ -74,12 +74,16 @@ export default {
     changeView() {
       router.push('/kodutood');
     },
-    getEvents(info) {
-      const start = (new Date(info.start));
-      start.setDate(start.getDate() + ((1 - start.getDay() + 7) % 7));
+    getWeekRange(date) {
+      const start = new Date(date);
+      start.setDate(start.getDate() - start.getDay() + 1);
       const end = new Date(start);
-      end.setDate(end.getDate() + 6);   
-      return Promise.resolve(this.$store.getters.getTunniEvents(start, end));
+      end.setDate(end.getDate() + 6); 
+      const format = (d) => d.toLocaleDateString('en-GB');
+      return `${format(start)} - ${format(end)}`;
+    },
+    getEvents(info) {
+      return Promise.resolve(this.$store.getters.getTunniEvents(this.getWeekRange(info.start)));
     },
     showSettings() {
       this.$store.dispatch('changeSettingsVisibility');

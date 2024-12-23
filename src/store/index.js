@@ -9,7 +9,7 @@ export default createStore({
     moodleUrl: '',
     koduEvents: [],
     loading: true,
-    tunniEvents: [],
+    tunniEvents: new Map(),
     settings: false,
     isDarkmode: localStorage.getItem('dark_mode') !== undefined? localStorage.getItem('dark_mode') === 'true' : false,
   },
@@ -20,31 +20,9 @@ export default createStore({
     getMoodleUrl: (state) => state.moodleUrl,
     getOisUrl: (state) => state.oisUrl,
     getKoduEvents: (state) => state.koduEvents,
-    getTunniEvents: (state) => (start, end) => {
-      const startDate = normalizeDate(new Date(start));
-      const endDate = normalizeDate(new Date(end));
-      const filteredEvents = [];
-      state.tunniEvents.forEach((event) => {
-        const eventStart = new Date(event.start);
-        if (event.rrule) {
-          const ruleOptions = {
-            freq: event.rrule.freq === 2 ? RRule.WEEKLY : RRule.DAILY,
-            dtstart: new Date(event.rrule.dtstart),
-            interval: event.rrule.interval || 1,
-            until: event.rrule.until ? new Date(event.rrule.until) : null,
-            byweekday: event.rrule.byweekday || null,
-          };
-
-          const rule = new RRule(ruleOptions);
-          if (rule.between(startDate, endDate, true).length > 0) {
-            filteredEvents.push(event);
-          }
-        } else if (eventStart >= startDate && eventStart <= endDate) {
-          filteredEvents.push(event);
-        }
-      });
-      return filteredEvents;
-    },
+    getTunniEvents: (state) => (week) => {
+      return state.tunniEvents[week] || [];
+    }, 
   },
   mutations: {
     changeSettingsVisibility(state) {
@@ -156,7 +134,3 @@ export default createStore({
     },  
   }
 });
-
-function normalizeDate(date) {
-  return new Date(date.setHours(0, 0, 0, 0));
-}
