@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const nodeCron = require('node-cron');
+const jwt = require('jsonwebtoken');
 
 nodeCron.schedule("0 0 0 * * *", () => {
     const userdb = usersDB();
