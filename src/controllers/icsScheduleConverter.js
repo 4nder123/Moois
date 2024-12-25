@@ -35,37 +35,6 @@ const convertDuration = (duration) => {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 };
 
-const getEvents = (icsData) => {
-  const icsObject = ical.parseICS(icsData);
-  const events = Object.values(icsObject)
-    .filter(event => event.type === "VEVENT")
-    .map(event => {
-      const start = moment(event.start);
-      const end = moment(event.end);
-      const duration = event.duration ? convertDuration(event.duration) : null;
-      const isAllDay = start.format('HH:mm') < "08:00";
-      const exdates = event.exdate ? Object.values(event.exdate).map(exdate => moment(exdate).format('YYYY-MM-DDTHH:mm:ss')) : [];
-
-      return {
-        title: event.summary || "",
-        start: start.format(),
-        end: end.format(),
-        rrule: event.rrule?.options || null,
-        exdate: exdates,
-        duration: isAllDay ? "" : duration,
-        allDay: isAllDay,
-        color: event.categories ? getColor(event.categories[0]) : "",
-        extendedProps: {
-          description: [event.description?.trim(), event.location?.trim()]
-            .filter(Boolean)
-            .join("<br>")
-            .replace(/(\n)+/gm, "<br>"),
-        },
-      };
-    });
-  return events;
-};
-
 const getWeekRange = (date) => {
   const startOfWeek = moment(date).startOf("isoWeek");
   const endOfWeek = moment(startOfWeek).add(6, "days");
@@ -73,29 +42,56 @@ const getWeekRange = (date) => {
   return `${format(startOfWeek)} - ${format(endOfWeek)}`;
 };
 
+const parseEvent = (event) => {
+  const start = moment(event.start);
+  const end = moment(event.end);
+  const duration = event.duration ? convertDuration(event.duration) : null;
+  const isAllDay = start.format('HH:mm') < "08:00";
+  const exdates = event.exdate ? Object.values(event.exdate).map(exdate => moment(exdate).format('YYYY-MM-DDTHH:mm:ss')) : [];
+  return {
+    title: event.summary || "",
+    start: start.format(),
+    end: end.format(),
+    rrule: event.rrule?.options || null,
+    exdate: exdates,
+    duration: isAllDay ? "" : duration,
+    allDay: isAllDay,
+    color: event.categories ? getColor(event.categories[0]) : "",
+    extendedProps: {
+      description: [event.description?.trim(), event.location?.trim()]
+        .filter(Boolean)
+        .join("<br>")
+        .replace(/(\n)+/gm, "<br>"),
+    },
+  };
+};
+
 module.exports = function(icsData) {
-  const events = getEvents(icsData);
   const weeklyGroupedEvents = {};
-  events.forEach(event => {
-    if (event.rrule) {
-      const rule = new RRule(event.rrule);
-      const start = moment(event.rrule.dtstart).startOf("day").toDate();
-      const end = moment(event.rrule.until).endOf("day").toDate();
-      rule.between(start, end).forEach((occurrence) => {
-        const weekKey = getWeekRange(occurrence);
+  const icsObject = ical.parseICS(icsData);
+  Object.values(icsObject)
+    .filter(event => event.type === "VEVENT")
+    .forEach(event => {
+      const parsedEvent = parseEvent(event);
+      if (parsedEvent.rrule) {
+        const rule = new RRule(parsedEvent.rrule);
+        const start = moment(parsedEvent.rrule.dtstart).startOf("day").toDate();
+        const end = moment(parsedEvent.rrule.until).endOf("day").toDate();
+        rule.between(start, end).forEach((occurrence) => {
+          const weekKey = getWeekRange(occurrence);
+          if (!weeklyGroupedEvents[weekKey]) {
+            weeklyGroupedEvents[weekKey] = [];
+          }
+          weeklyGroupedEvents[weekKey].push(parsedEvent);
+        });
+      } else {
+        const eventDate = new Date(parsedEvent.start);
+        const weekKey = getWeekRange(eventDate);
         if (!weeklyGroupedEvents[weekKey]) {
           weeklyGroupedEvents[weekKey] = [];
         }
-        weeklyGroupedEvents[weekKey].push({ ...event });
-      });
-    } else {
-      const eventDate = new Date(event.start);
-      const weekKey = getWeekRange(eventDate);
-      if (!weeklyGroupedEvents[weekKey]) {
-        weeklyGroupedEvents[weekKey] = [];
+        weeklyGroupedEvents[weekKey].push(parsedEvent);
       }
-      weeklyGroupedEvents[weekKey].push(event);
-    }
-  });
+    });
   return weeklyGroupedEvents;
 };
