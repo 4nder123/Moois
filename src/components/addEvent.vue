@@ -74,7 +74,7 @@
                 const form = new FormData(e.target);
                 const inputs = Object.fromEntries(form.entries());
                 const event = {id:crypto.randomUUID(), title:inputs.title, start:inputs.date + "T" + inputs.time, extendedProps: {userAdded: 'true', status: "", color: ""}};
-                store.dispatch('addEvent', {event:event, update:true});
+                store.dispatch('homework/addEvent', {event:event, update:true});
                 close();
             };
             const close = () => {

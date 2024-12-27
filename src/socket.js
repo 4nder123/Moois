@@ -39,14 +39,14 @@ socket.on("connect_error", (err) => {
     }).catch(() => {SocketDisconnect();});
 });
 
-socket.on('addEvent', (event) => {store.dispatch('addEvent', {event:event, update:false});});
-socket.on('deleteEvent', (id) => {store.dispatch('deleteEvent', {id:id, update:false});});
+socket.on('addEvent', (event) => {store.dispatch('homework/addEvent', {event:event, update:false});});
+socket.on('deleteEvent', (id) => {store.dispatch('homework/deleteEvent', {id:id, update:false});});
 
-socket.on('addDone', (id) => {store.dispatch('setExtendedProps', { props:{id:id, status:"done", color: ""}, update: false});});
-socket.on('removeDone', (id) => {store.dispatch('setExtendedProps', { props:{id:id, status:"", color: ""}, update: false});});
+socket.on('addDone', (id) => {store.dispatch('homework/setDone', { props:{id:id, status:"done", color: ""}, update: false});});
+socket.on('removeDone', (id) => {store.dispatch('homework/setDone', { props:{id:id, status:"", color: ""}, update: false});});
 
-socket.on('addHighlight', ({ id, color }) => {store.dispatch('setExtendedProps', { props:{id:id, status:"high", color: color}, update: false});});
-socket.on('removeHighlight', (id) => {store.dispatch('setExtendedProps', { props:{id:id, status:"", color: ""}, update: false});});
+socket.on('addHighlight', ({ id, color }) => {store.dispatch('homework/setHigh', { props:{id:id, status:"high", color: color}, update: false});});
+socket.on('removeHighlight', (id) => {store.dispatch('homework/setHigh', { props:{id:id, status:"", color: ""}, update: false});});
 
-socket.on('updateOis', (url) => {store.dispatch("setOis", {url:url, update:false}); store.dispatch('resetLoading'); store.dispatch('fetchAllEvents');});
-socket.on('updateMoodle', (url) => {store.dispatch("setMoodle", {url:url, update:false}); store.dispatch('resetLoading'); store.dispatch('fetchAllEvents');});
+socket.on('updateOis', (url) => {store.dispatch("schedule/setUrl", {url:url, update:false}); store.dispatch('resetLoading'); store.dispatch('fetchAllEvents');});
+socket.on('updateMoodle', (url) => {store.dispatch("homework/setUrl", {url:url, update:false}); store.dispatch('resetLoading'); store.dispatch('fetchAllEvents');});

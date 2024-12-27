@@ -78,18 +78,17 @@ export default {
             if (target.contains('highlightIcon')) {
                 if(!this.isLongPress) {
                     const isHigh = event.extendedProps.status === "high";
-                    this.$store.dispatch('setExtendedProps', { props:{id:event.id, status:isHigh? "" : "high" , color: isHigh? "" : this.highlightColor}, update:true});
+                    this.$store.dispatch('homework/setHigh', { props:{id:event.id, status:isHigh? "" : "high" , color: isHigh? "" : this.highlightColor}, update:true});
                 } 
-                this.isLongPress = false;
                 return;
             }
             if (target.contains('deleteIcon')) {
-                this.$store.dispatch('deleteEvent', {id:event.id, update:true});
-                this.setTrashButtonVisibility(false);
+                this.$store.dispatch('homework/deleteEvent', {id:event.id, update:true});
+                this.setTrashButtonVisibility();
                 return
             }
             const isDone = event.extendedProps.status === "done";
-            this.$store.dispatch('setExtendedProps', { props:{id:event.id, status:isDone? "" : "done" , color: ""}, update: true});
+            this.$store.dispatch('homework/setDone', { props:{id:event.id, status:isDone? "" : "done"}, update: true});
         },
         onLongPress(el) {
             this.isLongPress = true;
@@ -102,21 +101,21 @@ export default {
             });
             popover.show();
 
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const eventType = isMobile ? 'touchstart' : 'mousedown';
             const closePopover = (e) => {
                 popover.dispose();
                 if (e.target.classList.contains('box')) {
                     this.changeSavedColor(e, el.target.id);
                 }
+                this.isLongPress = false;
                 document.removeEventListener(eventType, closePopover);
             };
-
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            const eventType = isMobile ? 'touchstart' : 'mousedown';
 
             document.addEventListener(eventType, closePopover, { once: true });
         },
         getEvents() {
-            return Promise.resolve(this.$store.getters.getKoduEvents);
+            return Promise.resolve(this.events);
         },
         onScroll() {
             if (window.scrollY > 2) {
@@ -131,7 +130,7 @@ export default {
         changeSavedColor(e, id) {
             this.highlightColor = e.target.classList[1];
             localStorage.setItem("high", e.target.classList[1]);
-            this.$store.dispatch('setExtendedProps', { props:{id:id, status:"high", color: this.highlightColor}, update: true});
+            this.$store.dispatch('homework/setHigh', { props:{id:id, status:"high", color: this.highlightColor}, update: true});
         },
         showSettings() {
             this.$store.dispatch('changeSettingsVisibility');
@@ -149,8 +148,7 @@ export default {
             } 
         },
         setTrashButtonVisibility() {
-            const events = this.$store.getters.getKoduEvents;
-            const isUserAdded = events.some(event => event.extendedProps.userAdded === 'true');
+            const isUserAdded = this.events.some(event => event.extendedProps.userAdded === 'true');
             const trashButton = document.querySelector(".fc-trash-button");
             if (!trashButton) return;
             const shouldDisplay = isUserAdded ? "" : "none";
@@ -165,7 +163,7 @@ export default {
     },
     computed: {
         events() {
-            return this.$store.getters.getKoduEvents;
+            return this.$store.getters['homework/getEvents'];
         },
     },
     watch: {

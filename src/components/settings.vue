@@ -54,14 +54,14 @@
         name: 'SettingsModal',
         setup(_, { emit }) {
             const store = useStore();
-            const oisUrl = ref(store.getters.getOisUrl);
-            const moodleUrl = ref(store.getters.getMoodleUrl);
+            const oisUrl = ref(store.getters["schedule/getUrl"]);
+            const moodleUrl = ref(store.getters["homework/getUrl"]);
             const submit = e => {
                 const form = new FormData(e.target);
                 const inputs = Object.fromEntries(form.entries());
                 let didUpdate = false;
-                if(oisUrl.value !== inputs.ois) { store.dispatch("setOis", {url:inputs.ois, update:true}); didUpdate = true; }
-                if(moodleUrl.value !== inputs.moodle) { store.dispatch("setMoodle", {url:inputs.moodle, update:true}); didUpdate = true; }
+                if(oisUrl.value !== inputs.ois) { store.dispatch("schedule/setUrl", {url:inputs.ois, update:true}); didUpdate = true; }
+                if(moodleUrl.value !== inputs.moodle) { store.dispatch("homework/setUrl", {url:inputs.moodle, update:true}); didUpdate = true; }
                 if(didUpdate) { store.dispatch("resetLoading"); store.dispatch("fetchAllEvents"); }
                 emit('close');
             };

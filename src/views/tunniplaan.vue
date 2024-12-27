@@ -83,7 +83,7 @@ export default {
       return `${format(start)} - ${format(end)}`;
     },
     getEvents(info) {
-      return Promise.resolve(this.$store.getters.getTunniEvents(this.getWeekRange(info.start)));
+      return Promise.resolve(this.$store.getters['schedule/getEvents'](this.getWeekRange(info.start)));
     },
     showSettings() {
       this.$store.dispatch('changeSettingsVisibility');
