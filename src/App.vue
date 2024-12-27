@@ -178,6 +178,15 @@ export default {
     50%{background-size:calc(100%/3) 100%,calc(100%/3) 0%  ,calc(100%/3) 100%}
     66%{background-size:calc(100%/3) 100%,calc(100%/3) 100%,calc(100%/3) 0%  }
   }
+
+  @media (pointer:none), (pointer:coarse) {
+    input {
+      font-size: 16px;
+    }
+    .pv-select {
+      font-size: 16px !important;
+    }
+  }
 </style>
 <!-- Dark mode -->
 <style>
