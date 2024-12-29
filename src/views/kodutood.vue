@@ -3,7 +3,7 @@
     <FullCalendar class="listView" ref="fullCalendar" :options="calendarOptions">
         <template v-slot:eventContent='arg'>
             <div class="event" :class="arg.event.extendedProps.color">
-                <div class='eventTitle' :class="arg.event.extendedProps.status">{{ arg.event.title.replace(/(\S{25})/g, '$1\u200B') }}</div>
+                <div class='eventTitle' :class="arg.event.extendedProps.status">{{ arg.event.title }}</div>
                 <div v-if="arg.event.extendedProps.userAdded === 'true' && isDelete" class="eventButton deleteIcon"></div>
                 <div :id="arg.event.id" v-else-if="arg.event.extendedProps.status !== 'done'" class="eventButton highlightIcon" v-long-press @onLongPress="onLongPress"></div>
             </div>
@@ -204,6 +204,7 @@ export default {
         justify-content: space-between;
     }
     .eventTitle {
+        word-break: break-word;
         padding: 8px 0px 8px 14px;
     }
     .eventButton {
