@@ -283,21 +283,18 @@ export default {
     tr:has(.yellow) {
         background-color: rgb(255, 255, 0, 0.25);
     }
-    
+    .fc-list-table {
+      font-size: clamp(8px, 4vw, 16px) !important;
+    }
     @media (max-width: 500px) {
         .eventButton {
             margin-right: 0px !important;
             padding: 0px 25.25px 0px 21.25px;
         }
     }   
-    @media (max-width: 395px) {
+    @media (max-width: 400px) {
         .fc-list-event-time {
             white-space: normal !important;
         }
     }  
-    @media (max-width: 345px) {
-        .fc-list-table {
-            font-size: round(down, 4.4vw, 1px) !important;
-        }
-    }   
 </style>
