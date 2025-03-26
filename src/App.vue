@@ -7,17 +7,16 @@
 </template>
 
 <script>
-import Settings from '@/components/settings.vue';
+import { defineAsyncComponent } from 'vue'
 import router from './router';
 import { SocketConnect, SocketDisconnect } from '@/socket'
 import axios from 'axios';
-import christmasLights from './components/christmasLights.vue';
 
 export default {
   name: 'home',
   components: {
-    christmasLights,
-    Settings
+    christmasLights: defineAsyncComponent(() => import('./components/christmasLights.vue')),
+    Settings: defineAsyncComponent(() => import('@/components/settings.vue'))
   },
   computed: {
     isLoading() {
@@ -40,7 +39,15 @@ export default {
     },
     closeSettings() {
       this.$store.dispatch('changeSettingsVisibility');
-    }
+    },
+    beforeUnloadListener() { SocketDisconnect(); },
+    pageShowListener(event) { if (event.persisted) { SocketConnect(); } },
+    settingsPreload(e) {
+      if(e.target.closest('.fc-settings-button')) {
+        window.removeEventListener('mouseover', this.settingsPreload);
+        import('@/components/settings.vue');
+      }
+    },
   },
   async mounted() {
     if(this.isDarkmode) document.body.classList.add("dark-mode");
@@ -51,18 +58,14 @@ export default {
     } catch {};
   },
   created() {
-    this.beforeUnloadListener = () => SocketDisconnect();
-    this.pageShowListener = (event) => {
-      if (event.persisted) {
-        SocketConnect();
-      }
-    };
     window.addEventListener("beforeunload", this.beforeUnloadListener);
     window.addEventListener("pageshow", this.pageShowListener);
+    window.addEventListener("mouseover", this.settingsPreload);
   }, 
   beforeUnmount() {
     window.removeEventListener('beforeunload', this.beforeUnloadListener);
     window.removeEventListener('pageshow', this.pageShowListener);
+    window.removeEventListener('mouseover', this.settingsPreload);
   }
 }
 </script>

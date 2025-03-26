@@ -12,8 +12,8 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from 'vue'
 import FullCalendar from '@fullcalendar/vue3'
-import addEvent from '../components/addEvent.vue';
 import etLocale from '@fullcalendar/core/locales/et';
 import listPlugin from '@fullcalendar/list';
 import { vLongPress } from '@/directives/vLongPress';
@@ -24,7 +24,7 @@ export default {
     name: 'kodutood',
     components: {
         FullCalendar,
-        addEvent,
+        addEvent: defineAsyncComponent(() => import('@/components/addEvent.vue')),
     },
     directives: {
         longPress: vLongPress,
@@ -160,6 +160,18 @@ export default {
         refetchEvents() {
             if (document.visibilityState === 'visible') this.$store.dispatch('fetchAllEvents');
         }, 
+        addEventPreload(e) {
+            if(e.target.closest('.fc-addEvent-button')) {
+                window.removeEventListener('mouseover', this.addEventPreload);
+                import('@/components/addEvent.vue');
+            }
+        },
+        tunniplaanPreload(e) {
+            if(e.target.closest('.fc-tunniplaan-button')) {
+                window.removeEventListener('mouseover', this.tunniplaanPreload);
+                import('@/views/tunniplaan.vue');
+            }
+        },
     },
     computed: {
         events() {
@@ -179,10 +191,14 @@ export default {
         this.setTrashButtonVisibility();
     },
     created() {
+        window.addEventListener('mouseover', this.addEventPreload);
+        window.addEventListener('mouseover', this.tunniplaanPreload);
         window.addEventListener('visibilitychange', this.refetchEvents);
         window.addEventListener("scroll", this.onScroll);
     },
     beforeUnmount() {
+        window.removeEventListener('mouseover', this.addEventPreload);
+        window.removeEventListener('mouseover', this.tunniplaanPreload);
         window.removeEventListener('visibilitychange', this.refetchEvents);
         window.removeEventListener("scroll", this.onScroll);
     }

@@ -1,8 +1,4 @@
 import { createRouter, createMemoryHistory } from 'vue-router'
-import tunniplaan from '../views/tunniplaan.vue'
-import kodutood from '../views/kodutood.vue'
-import login from '../views/login.vue'
-import register from '../views/register.vue'
 import { SocketDisconnect } from '@/socket'
 import store from "@/store";
 
@@ -10,23 +6,23 @@ const routes = [
   {
     path: '/kodutood',
     name: 'kodutood',
-    component: kodutood,
+    component: () => import('../views/kodutood.vue')
   },
   {
     path: '/tunniplaan',
     name: 'tunniplaan',
-    component: tunniplaan,
+    component: () => import('../views/tunniplaan.vue')
   },
   {
     path: '/login/:email?/:success?',
     name: 'login',
     props: true,
-    component: login,
+    component: () => import('../views/login.vue')
   },
   {
     path: '/register',
     name: 'register',
-    component: register,
+    component: () => import('../views/register.vue'),
   },
 ]
 
