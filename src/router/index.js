@@ -24,6 +24,11 @@ const routes = [
     name: 'register',
     component: () => import('../views/register.vue'),
   },
+  {
+    path: '/error',
+    name: 'error',
+    component: () => import('../views/error.vue'),
+  },
 ]
 
 const router = createRouter({

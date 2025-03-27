@@ -3,6 +3,7 @@ import router from "@/router";
 
 let isRefreshing = false;
 let failedQueue = [];
+const limit = 5;
 
 const processQueue = (error, token = null) => {
     failedQueue.forEach(prom => {
@@ -13,6 +14,32 @@ const processQueue = (error, token = null) => {
         }
     });
     failedQueue = [];
+};
+
+const tryToRefresh = async(config) => {
+    let attempt = 0;
+    while (attempt < limit) {
+        try {
+            const { data } = await axios.post('/api/user/refresh', {}, { withCredentials: true });
+            axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+            processQueue(null, data.token);
+            config.headers['Authorization'] = `Bearer ${data.token}`;
+            return config;
+        } catch (err) {
+            if(err.response?.status === 403) {
+                processQueue(err, null);
+                await router.push("/login");
+                throw err;
+            }
+            attempt++;
+            if(attempt >= limit) {
+                processQueue(err, null);
+                await router.push("/error");
+                throw err;
+            }
+            await new Promise(r => setTimeout(r, 1000));
+        }
+    }
 };
 
 axios.interceptors.request.use(
@@ -31,15 +58,9 @@ axios.interceptors.request.use(
             }
 
             isRefreshing = true;
-
             try {
-                const { data } = await axios.post('/api/user/refresh', {}, { withCredentials: true });
-                axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-                processQueue(null, data.token);
-                config.headers['Authorization'] = `Bearer ${data.token}`;
+                return await tryToRefresh(config);
             } catch (err) {
-                processQueue(err, null);
-                await router.push("/login");
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;
@@ -71,14 +92,8 @@ axios.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                const { data } = await axios.post('/api/user/refresh', {}, { withCredentials: true });
-                axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-                originalRequest.headers['Authorization'] = `Bearer ${data.token}`;
-                processQueue(null, data.token);
-                return axios(originalRequest);
+                return axios(await tryToRefresh(originalRequest));
             } catch (err) {
-                processQueue(err, null);
-                await router.push("/login");
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;
