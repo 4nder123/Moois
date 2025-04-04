@@ -7,20 +7,20 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
-    "@fullcalendar/core": "^6.1.15",
-    "@fullcalendar/icalendar": "^6.1.15",
-    "@fullcalendar/list": "^6.1.15",
-    "@fullcalendar/rrule": "^6.1.15",
-    "@fullcalendar/timegrid": "^6.1.15",
-    "@fullcalendar/vue3": "^6.1.15",
+    "@fullcalendar/core": "^6.1.17",
+    "@fullcalendar/icalendar": "^6.1.17",
+    "@fullcalendar/list": "^6.1.17",
+    "@fullcalendar/rrule": "^6.1.17",
+    "@fullcalendar/timegrid": "^6.1.17",
+    "@fullcalendar/vue3": "^6.1.17",
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
-    "core-js": "^3.8.3",
+    "core-js": "^3.41.0",
     "socket.io-client": "^4.8.1",
     "vue": "^3.2.13",
     "vue-flatpickr-component": "^11.0.5",
-    "vue-router": "^4.0.3",
-    "vuex": "^4.0.0"
+    "vue-router": "^4.5.0",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~5.0.0",
