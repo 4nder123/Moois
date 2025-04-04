@@ -110,12 +110,6 @@ export default {
         this.clearEventSelection();
       }
     },
-    kodutooPreload(e) {
-        if(e.target.closest('.fc-kodutood-button')) {
-            window.removeEventListener('mouseover', this.kodutooPreload);
-            import('@/views/kodutood.vue');
-        }
-    },
   },
   mounted() {
     this.calendar = this.$refs.fullCalendar.getApi();
@@ -128,14 +122,12 @@ export default {
     }); 
   },
   created() {
-    window.addEventListener('mouseover', this.kodutooPreload);
     window.addEventListener('visibilitychange', this.refetchEvents);
     window.addEventListener("resize", this.sizeUpdate);
     window.addEventListener('click', this.handleOutsideClick);
   },
   beforeUnmount() {
     this.popover.dispose();
-    window.removeEventListener('mouseover', this.kodutooPreload);
     window.removeEventListener('visibilitychange', this.refetchEvents);
     window.removeEventListener("resize", this.sizeUpdate);
     window.removeEventListener('click', this.handleOutsideClick);

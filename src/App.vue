@@ -42,12 +42,27 @@ export default {
     },
     beforeUnloadListener() { SocketDisconnect(); },
     pageShowListener(event) { if (event.persisted) { SocketConnect(); } },
-    settingsPreload(e) {
+    settingsPreFetch(e) {
       if(e.target.closest('.fc-settings-button')) {
-        window.removeEventListener('mouseover', this.settingsPreload);
+        window.removeEventListener('mouseover', this.settingsPreFetch);
         import('@/components/settings.vue');
       }
     },
+    viewPreFetch(e) {
+      if(e.target.closest('.fc-tunniplaan-button')) {
+        window.removeEventListener('mouseover', this.viewPreFetch);
+        import('@/views/tunniplaan.vue');
+      } else if(e.target.closest('.fc-kodutood-button')) {
+        window.removeEventListener('mouseover', this.viewPreFetch);
+        import('@/views/kodutood.vue');
+      }
+    },
+    addEventPreFetch(e) {
+            if(e.target.closest('.fc-addEvent-button')) {
+                window.removeEventListener('mouseover', this.addEventPreFetch);
+                import('@/components/addEvent.vue');
+            }
+        },
   },
   async mounted() {
     if(this.isDarkmode) document.body.classList.add("dark-mode");
@@ -60,12 +75,16 @@ export default {
   created() {
     window.addEventListener("beforeunload", this.beforeUnloadListener);
     window.addEventListener("pageshow", this.pageShowListener);
-    window.addEventListener("mouseover", this.settingsPreload);
+    window.addEventListener("mouseover", this.settingsPreFetch);
+    window.addEventListener("mouseover", this.viewPreFetch);
+    window.addEventListener('mouseover', this.addEventPreFetch);
   }, 
   beforeUnmount() {
     window.removeEventListener('beforeunload', this.beforeUnloadListener);
     window.removeEventListener('pageshow', this.pageShowListener);
-    window.removeEventListener('mouseover', this.settingsPreload);
+    window.removeEventListener('mouseover', this.settingsPreFetch);
+    window.removeEventListener("mouseover", this.viewPreFetch);
+    window.removeEventListener('mouseover', this.addEventPreFetch);
   }
 }
 </script>

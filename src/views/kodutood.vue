@@ -160,18 +160,6 @@ export default {
         refetchEvents() {
             if (document.visibilityState === 'visible') this.$store.dispatch('fetchAllEvents');
         }, 
-        addEventPreload(e) {
-            if(e.target.closest('.fc-addEvent-button')) {
-                window.removeEventListener('mouseover', this.addEventPreload);
-                import('@/components/addEvent.vue');
-            }
-        },
-        tunniplaanPreload(e) {
-            if(e.target.closest('.fc-tunniplaan-button')) {
-                window.removeEventListener('mouseover', this.tunniplaanPreload);
-                import('@/views/tunniplaan.vue');
-            }
-        },
     },
     computed: {
         events() {
@@ -191,14 +179,10 @@ export default {
         this.setTrashButtonVisibility();
     },
     created() {
-        window.addEventListener('mouseover', this.addEventPreload);
-        window.addEventListener('mouseover', this.tunniplaanPreload);
         window.addEventListener('visibilitychange', this.refetchEvents);
         window.addEventListener("scroll", this.onScroll);
     },
     beforeUnmount() {
-        window.removeEventListener('mouseover', this.addEventPreload);
-        window.removeEventListener('mouseover', this.tunniplaanPreload);
         window.removeEventListener('visibilitychange', this.refetchEvents);
         window.removeEventListener("scroll", this.onScroll);
     }
