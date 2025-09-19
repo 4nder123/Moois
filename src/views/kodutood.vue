@@ -1,5 +1,6 @@
 <template>
     <addEvent v-if="this.isAddEventVisible" @close="this.toggleAddEvent"/>
+    <Filter v-if="this.isFilterVisible" @close="this.toggleFilter" />
     <FullCalendar class="listView" ref="fullCalendar" :options="calendarOptions">
         <template v-slot:eventContent='arg'>
             <div class="event" :class="arg.event.extendedProps.color">
@@ -25,6 +26,7 @@ export default {
     components: {
         FullCalendar,
         addEvent: defineAsyncComponent(() => import('@/components/addEvent.vue')),
+        Filter: defineAsyncComponent(() => import('@/components/filter.vue'))
     },
     directives: {
         longPress: vLongPress,
@@ -32,6 +34,7 @@ export default {
     data() {
         return {
             isAddEventVisible: false,
+            isFilterVisible: false,
             isLongPress: false,
             isDelete: false,
             highlightColor: (localStorage.getItem("high") && /(red|orange|yellow)/.test(localStorage.getItem("high"))) ? localStorage.getItem("high") : "red",
@@ -40,6 +43,7 @@ export default {
                 customButtons: {
                     trash: { text: 'Kustuta', icon: 'trash', click: this.toggleDelete },
                     addEvent: { text: 'Lisa', icon: 'addEvent', click: this.toggleAddEvent},
+                    filter: { text: 'Filter', icon: 'filter', click: this.toggleFilter},
                     tunniplaan: { text: 'Tunniplaan', click: this.changeView },
                     settings: { text: 'Seaded', icon: 'settings ', click: this.showSettings}
                 },
@@ -58,7 +62,7 @@ export default {
                 headerToolbar: {
                     left: '',
                     center: '',
-                    right: 'addEvent trash tunniplaan settings'
+                    right: 'filter addEvent trash tunniplaan settings'
                 }
             }
         }
@@ -138,6 +142,9 @@ export default {
         toggleAddEvent() {
             if (this.isAddEventVisible) { this.setTrashButtonVisibility(); }
             this.isAddEventVisible = !this.isAddEventVisible;
+        },
+        toggleFilter() {
+            this.isFilterVisible= !this.isFilterVisible;
         },
         toggleDelete(e) {
             this.isDelete = !this.isDelete;

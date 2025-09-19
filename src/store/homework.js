@@ -1,13 +1,16 @@
 import axios from 'axios';
+
 export default {
     namespaced: true,
     state: {
         url: '',
         events: [],
+        filter: localStorage.getItem('filter') !== null? JSON.parse(localStorage.getItem('filter')) : [],
     },
     getters: {
         getUrl: (state) => state.url,
-        getEvents: (state) => state.events,
+        getEvents: (state) => state.events.filter(e => !state.filter.includes(e.extendedProps.status) && !state.filter.includes(e.extendedProps.color)),
+        getFilter: (state) => state.filter,
     },
     mutations: {
         setEvents(state, events) {
@@ -28,6 +31,10 @@ export default {
             event.extendedProps.status = status;
             event.extendedProps.color = color;
         },
+        setFilter(state, filter) {
+            state.filter = filter;
+            localStorage.setItem('filter', JSON.stringify(filter));
+        }
     },
     actions: {
         setUrl({ commit }, {url, update}) {
@@ -70,5 +77,8 @@ export default {
                 commit('setEvents', data);
               } catch {}
         },
+        setFilter({ commit }, filter) {
+            commit('setFilter', filter);
+        }
     }
 }

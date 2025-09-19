@@ -58,11 +58,17 @@ export default {
       }
     },
     addEventPreFetch(e) {
-            if(e.target.closest('.fc-addEvent-button')) {
-                window.removeEventListener('mouseover', this.addEventPreFetch);
-                import('@/components/addEvent.vue');
-            }
-        },
+        if(e.target.closest('.fc-addEvent-button')) {
+            window.removeEventListener('mouseover', this.addEventPreFetch);
+            import('@/components/addEvent.vue');
+        }
+    },
+    filterPreFetch(e) {
+        if(e.target.closest('.fc-filter-button')) {
+            window.removeEventListener('mouseover', this.filterPreFetch);
+            import('@/components/filter.vue');
+        }
+    },
   },
   async mounted() {
     if(this.isDarkmode) document.body.classList.add("dark-mode");
@@ -78,6 +84,7 @@ export default {
     window.addEventListener("mouseover", this.settingsPreFetch);
     window.addEventListener("mouseover", this.viewPreFetch);
     window.addEventListener('mouseover', this.addEventPreFetch);
+    window.addEventListener('mouseover', this.filterPreFetch);
   }, 
   beforeUnmount() {
     window.removeEventListener('beforeunload', this.beforeUnloadListener);
@@ -85,6 +92,7 @@ export default {
     window.removeEventListener('mouseover', this.settingsPreFetch);
     window.removeEventListener("mouseover", this.viewPreFetch);
     window.removeEventListener('mouseover', this.addEventPreFetch);
+    window.removeEventListener('mouseover', this.filterPreFetch);
   }
 }
 </script>
@@ -97,7 +105,7 @@ export default {
   }
   body::after{
     position:absolute; width:0; height:0; overflow:hidden; z-index:-1;
-    content:url(./assets/gear.svg) url(./assets/check.svg) url(./assets/highlighter.svg) url(./assets/plus.svg) url(./assets/trash.svg);
+    content:url(./assets/gear.svg) url(./assets/check.svg) url(./assets/highlighter.svg) url(./assets/plus.svg) url(./assets/trash.svg) url(./assets/filter.svg);
   }
   body:has(.modal) {
     overflow: hidden;
@@ -135,6 +143,12 @@ export default {
     mask-image: url(./assets/plus.svg);
     max-width: 14px;
     width: 0.58em;
+  }
+  .fc-icon.fc-icon-filter {
+    -webkit-mask-image: url(./assets/filter.svg);
+    mask-image: url(./assets/filter.svg);
+    max-width: 16px;
+    width: 0.67em;
   }
   .popover {
     z-index: 9999;

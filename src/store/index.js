@@ -7,7 +7,7 @@ export default createStore({
   state: {
     loading: true,
     settings: false,
-    isDarkmode: localStorage.getItem('dark_mode') !== undefined? localStorage.getItem('dark_mode') === 'true' : false,
+    isDarkmode: localStorage.getItem('dark_mode') === 'true',
   },
   getters: {
     isDarkmode: (state) => state.isDarkmode,
