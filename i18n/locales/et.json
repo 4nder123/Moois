@@ -1,0 +1,25 @@
+{
+  "settings": {
+    "title": "Seadmed",
+    "ois": "Õis kalendri link",
+    "moodle": "Moodle kalendri link",
+    "defaultView": {
+      "label": "Põhivaade",
+      "timetable": "Tunniplaan",
+      "homework": "Kodutoo"
+    },
+    "darkMode": "Tume režiim",
+    "logout": "Logi välja"
+  },
+  "auth": {
+    "login": "Logi sisse",
+    "register": "Registreeri",
+    "noAccount": "Ei ole kasutaja?",
+    "createAccount": "Loo kasutaja",
+    "haveAccount": "Kasutaja juba tehtud?",
+    "forgotPassword": "Unustasid parooli?",
+    "resetPassword": "Lähtesta parool",
+    "backToLogin": "Tagasi sisselogimise juurde",
+    "accountCreated": "Kasutaja loodud!"
+  }
+}
