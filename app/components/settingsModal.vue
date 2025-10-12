@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import "~/assets/css/modal.css";
+const store = useDashboardStore();
+const emit = defineEmits(["close"]);
 
 const submit = () => {
-  console.log("Form submitted");
+  emit("close");
 };
 </script>
 
@@ -18,9 +20,9 @@ const submit = () => {
           <p>
             {{ $t("settings.ois") }}
             <input
+              id="ois"
               name="ois"
               type="text"
-              id="ois"
               class="modal-input"
               placeholder="Õis"
             />
@@ -28,16 +30,16 @@ const submit = () => {
           <p>
             {{ $t("settings.moodle") }}
             <input
+              id="moodle"
               name="moodle"
               type="text"
-              id="moodle"
               placeholder="Moodle"
               class="modal-input"
             />
           </p>
           <p>
             {{ $t("settings.defaultView.label") }}
-            <select class="defaultView">
+            <select v-model="store.defaultView" class="defaultView">
               <option value="timetable">
                 {{ $t("settings.defaultView.timetable") }}
               </option>
@@ -48,7 +50,7 @@ const submit = () => {
           </p>
           <p>
             {{ $t("settings.darkMode") }}
-            <input type="checkbox" id="switch" />
+            <input id="switch" type="checkbox" />
             <label for="switch"></label>
           </p>
           <p>

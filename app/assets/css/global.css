@@ -1,0 +1,12 @@
+input {
+  font-family: "Roboto", sans-serif;
+  outline: 0;
+  background: #f0f0f0;
+  width: 100%;
+  border: none;
+  padding: 15px;
+  box-sizing: border-box;
+  font-size: 14px;
+  border-radius: 4px;
+  -webkit-border-radius: 4px;
+}

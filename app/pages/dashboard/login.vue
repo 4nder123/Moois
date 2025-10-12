@@ -13,16 +13,16 @@ definePageMeta({
       <div v-if="false" class="success">{{ $t("auth.accountCreated") }}</div>
       <form @submit.prevent="">
         <input
+          id="email"
           name="email"
           type="email"
-          id="email"
           placeholder="email"
           required
         />
         <input
+          id="password"
           name="password"
           type="password"
-          id="password"
           placeholder="parool"
           required
         />
