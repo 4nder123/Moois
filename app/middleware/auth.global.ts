@@ -1,27 +1,23 @@
-async function isUserLoggedIn() {
-  try {
-    const { data } = await authClient.getSession();
-    return !!data?.session;
-  } catch {
-    return false;
-  }
-}
-
 export default defineNuxtRouteMiddleware(async (to) => {
   const authMeta = to.meta.auth as {
-    unauthenticatedOnly?: boolean;
+    unauthenticatedOnly: boolean;
     navigateUnauthenticatedTo?: string;
-    navigateAuthenticatedTo?: string;
+    navigateAuthenticatedTo?: string; 
   };
+
   if (!authMeta) return;
 
-  const isLoggedIn = await isUserLoggedIn();
+  const {data: session} = await authClient.useSession(useFetch);
+  const loggedIn = !!session.value;
 
-  if (authMeta.unauthenticatedOnly === false && !isLoggedIn) {
-    return navigateTo(authMeta.navigateUnauthenticatedTo || "/login");
+  if (authMeta.unauthenticatedOnly && loggedIn) {
+    if(to.path === authMeta.navigateAuthenticatedTo) return;
+    return navigateTo(authMeta.navigateAuthenticatedTo);
   }
 
-  if (authMeta.unauthenticatedOnly && isLoggedIn) {
-    return navigateTo(authMeta.navigateAuthenticatedTo || "/dashboard");
+  if (!authMeta.unauthenticatedOnly && !loggedIn) {
+    if (to.path === authMeta.navigateUnauthenticatedTo) return;
+    return navigateTo(authMeta.navigateUnauthenticatedTo);
   }
 });
+

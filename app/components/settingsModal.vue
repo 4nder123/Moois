@@ -1,19 +1,16 @@
 <script setup lang="ts">
 import "~/assets/css/modal.css";
+
 const store = useDashboardStore();
 const emit = defineEmits(["close"]);
+const { signOut } = useAuth();
 
 const submit = () => {
   emit("close");
 };
 const logout = async () => {
-  await authClient.signOut({
-    fetchOptions: {
-      onSuccess: async () => {
-        await navigateTo("/login");
-      },
-    },
-  });
+  await signOut();
+  navigateTo("/login");
 };
 </script>
 

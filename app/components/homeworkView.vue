@@ -1,5 +1,5 @@
 <template>
-  <FullCalendar ref="fullCalendar" class="listView" :options="calendarOptions">
+  <FullCalendar :options="calendarOptions">
   </FullCalendar>
 </template>
 <script setup lang="ts">

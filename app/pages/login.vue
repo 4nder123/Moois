@@ -1,9 +1,8 @@
 <template>
   <div class="auth-page">
-    <div class="loading" v-if="isLoading"></div>
+    <div v-if="isLoading" class="loading"></div>
     <div class="form">
-      <div v-if="errorMsg" class="msgBox error">{{ errorMsg }}</div>
-      <div v-if="message" class="msgBox success">{{ message }}</div>
+      <msg-box v-if="message" :message="message" :isError="msgIsError"></msg-box>
 
       <form v-if="step === 'email'" autocomplete="off" @submit.prevent="login">
         <input
@@ -47,67 +46,59 @@ definePageMeta({
   },
 });
 
+const { requestOTP, verifyOTP } = useAuth();
+const { isLoading, startLoader, stopLoader} = useLoader();
 const email = ref("");
 const otpDigits = ref<string[]>(["", "", "", "", "", ""]);
 const step = ref<"email" | "otp">("email");
 const message = ref("");
-const errorMsg = ref("");
-const isLoading = ref(false);
+const msgIsError = ref(false);
 
 function setMsgBox(msg: string, isError = false) {
-  if (isError) {
-    errorMsg.value = msg;
-    message.value = "";
-  } else {
-    message.value = msg;
-    errorMsg.value = "";
-  }
+  message.value = msg;
+  msgIsError.value = isError;
 }
 
 async function login() {
-  errorMsg.value = "";
-  message.value = "";
-
-  const { error } = await authClient.emailOtp.sendVerificationOtp({
-    email: email.value,
-    type: "sign-in",
-  });
-
-  if (error) {
-    setMsgBox($t("auth.codeFailed") as string, true);
-  } else {
-    setMsgBox($t("auth.codeSent") as string);
-    step.value = "otp";
-    await nextTick();
-    const firstInput = document.querySelector<HTMLInputElement>("#otp-0");
-    firstInput?.focus();
+  try {
+    startLoader();
+    const { error } = await requestOTP(email.value);
+    if (error)  {setMsgBox($t("auth.codeFailed"), true); return;}
+    setMsgBox($t("auth.codeSent"));
+    await goToOTPStep();
+  } catch {
+    setMsgBox($t("auth.errorUnexpected"), true);
+  } finally {
+    stopLoader();
   }
+}
+
+async function goToOTPStep() {
+  step.value = "otp";
+  await nextTick();
+  const firstInput = document.querySelector<HTMLInputElement>("#otp-0");
+  firstInput?.focus();
 }
 
 async function verifyOtp() {
   const otp = otpDigits.value.join("");
-
-  if (otp.length < 6) {
-    setMsgBox($t("auth.errorLength") as string, true);
-    return;
-  }
-  const loading = setTimeout(() => isLoading.value = true, 300);
+  if (otp.length < 6) { setMsgBox($t("auth.errorLength"), true); return; }
   try {
-    const { error } = await authClient.signIn.emailOtp({
-      email: email.value,
-      otp,
-    });
+    startLoader();
+    const { error } = await verifyOTP(email.value, otp);
     if (error) {
-      if (error.code === "TOO_MANY_ATTEMPTS") setMsgBox($t("auth.tooManyAttempts") as string, true);
-      else setMsgBox($t("auth.errorCode") as string, true);
+      const errorMessage = error.code === "TOO_MANY_ATTEMPTS"
+        ? $t("auth.tooManyAttempts")
+        : $t("auth.errorCode");
+      setMsgBox(errorMessage, true);
       return;
     }
-    return navigateTo("/dashboard");
+
+    navigateTo("/dashboard");
   } catch {
-    setMsgBox($t("auth.errorUnexpected") as string, true);
+    setMsgBox($t("auth.errorUnexpected"), true);
   } finally {
-    clearTimeout(loading);
-    isLoading.value = false;
+    stopLoader();
   }
 }
 
@@ -141,6 +132,10 @@ function handlePaste(event: ClipboardEvent) {
   const nextIndex = digits.length < 6 ? digits.length : 5;
   const next = document.querySelector<HTMLInputElement>(`#otp-${nextIndex}`);
   next?.focus();
+
+  if (otpDigits.value.join("").length === 6) {
+    verifyOtp();
+  }
 }
 </script>
 
@@ -219,26 +214,5 @@ function handlePaste(event: ClipboardEvent) {
 
 .otp-input:focus {
   border: 1px solid #2c3e50;
-}
-
-.msgBox {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 10px;
-  box-sizing: border-box;
-  border: 1px solid;
-  text-align: center;
-}
-
-.error {
-  background-color: #fee;
-  border-color: #edd;
-  color: #a66;
-}
-
-.success {
-  background-color: #efe;
-  border-color: #dcd;
-  color: #9a9;
 }
 </style>
