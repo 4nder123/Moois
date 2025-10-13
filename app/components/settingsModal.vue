@@ -6,6 +6,15 @@ const emit = defineEmits(["close"]);
 const submit = () => {
   emit("close");
 };
+const logout = async () => {
+  await authClient.signOut({
+    fetchOptions: {
+      onSuccess: async () => {
+        await navigateTo("/login");
+      },
+    },
+  });
+};
 </script>
 
 <template>
@@ -54,7 +63,7 @@ const submit = () => {
             <label for="switch"></label>
           </p>
           <p>
-            <button type="button" class="logout-button">
+            <button type="button" class="logout-button" @click="logout">
               {{ $t("settings.logout") }}
             </button>
           </p>

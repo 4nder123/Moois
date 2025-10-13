@@ -2,11 +2,13 @@
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
+  app: { head: { title: "Moois" } },
   modules: [
     "@nuxt/eslint",
     "@nuxtjs/i18n",
     "@pinia/nuxt",
     "pinia-plugin-persistedstate/nuxt",
+    "@nuxt/content",
   ],
   css: ["~/assets/css/global.css"],
   i18n: {

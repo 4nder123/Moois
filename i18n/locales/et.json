@@ -13,14 +13,13 @@
   },
   "auth": {
     "login": "Logi sisse",
-    "register": "Registreeri",
-    "noAccount": "Ei ole kasutaja?",
-    "createAccount": "Loo kasutaja",
-    "haveAccount": "Kasutaja juba tehtud?",
-    "forgotPassword": "Unustasid parooli?",
-    "resetPassword": "Lähtesta parool",
-    "backToLogin": "Tagasi sisselogimise juurde",
-    "accountCreated": "Kasutaja loodud!"
+    "verify": "Kinnita",
+    "errorLength": "Kood peab olema 6-kohaline",
+    "errorCode": "Vale või aegunud kood",
+    "codeSent": "Kood saadetud teie e-posti aadressile",
+    "codeFailed": "Koodi saatmine nurjus. Proovi uuesti.",
+    "tooManyAttempts": "Liiga palju katseid. Palun taotlege uus kinnituskood.",
+    "errorUnexpected": "Midagi läks valesti. Proovi uuesti."
   },
   "homework": {
     "title": "Kodutöö",

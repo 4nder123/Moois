@@ -16,20 +16,21 @@
 
 <script setup lang="ts">
 definePageMeta({
+  auth: {
+    unauthenticatedOnly: false,
+    navigateUnauthenticatedTo: "/login",
+  },
   middleware: [
     function (to) {
       const qp = to.query.view;
       const dashboardStore = useDashboardStore();
       dashboardStore.$persist();
       if (qp !== "homework" && qp !== "timetable") {
-        return navigateTo(
-          {
-            path: to.path,
-            query: { view: dashboardStore.defaultView },
-            hash: to.hash,
-          },
-          { replace: true },
-        );
+        return navigateTo({
+          path: to.path,
+          query: { view: dashboardStore.defaultView },
+          hash: to.hash,
+        });
       }
     },
   ],
@@ -37,15 +38,14 @@ definePageMeta({
 
 const isSettingsVisible = ref(false);
 const route = useRoute();
-const router = useRouter();
 
 const viewParam = computed(() => route.query.view);
 
 const changeView = () => {
   const next = viewParam.value === "timetable" ? "homework" : "timetable";
-  router.push({
+  navigateTo({
     path: route.path,
-    query: { ...route.query, view: next },
+    query: { view: next },
     hash: route.hash,
   });
 };
