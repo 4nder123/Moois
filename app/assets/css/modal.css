@@ -1,7 +1,4 @@
 .background {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   position: fixed;
   top: 0;
   left: 0;
@@ -13,7 +10,6 @@
 
 .modal {
   margin: 10% auto;
-  width: 100%;
   max-width: 570px;
   box-shadow:
     0 5px 8px rgba(0, 0, 0, 0.2),
@@ -21,8 +17,10 @@
 }
 
 .modal header {
-  background: #2c3e50;
-  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-primary);
   color: #ffffff;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
@@ -33,8 +31,20 @@
 }
 
 .modal section {
-  padding: 10px 20px;
   background: #fff;
+}
+
+.modal header,
+.modal section {
+  padding: 14px 20px;
+}
+
+.modal input {
+  width: 100%;
+}
+
+.modal button:not(.close) {
+  padding: 10px;
 }
 
 .close {
@@ -42,10 +52,11 @@
   border: none;
   color: #fff;
   font-size: 30px;
-  float: right;
   cursor: pointer;
+  padding: 0;
 }
 
 .close:hover {
   color: #000;
+  background: none;
 }

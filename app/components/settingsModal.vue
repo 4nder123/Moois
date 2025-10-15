@@ -2,15 +2,13 @@
 import "~/assets/css/modal.css";
 
 const store = useDashboardStore();
-const emit = defineEmits(["close"]);
-const { signOut } = useAuth();
+const emit = defineEmits(["close", "logout"]);
 
 const submit = () => {
   emit("close");
 };
 const logout = async () => {
-  await signOut();
-  navigateTo("/login");
+  emit("logout");
 };
 </script>
 
@@ -19,8 +17,8 @@ const logout = async () => {
     <div class="modal">
       <form @submit.prevent="submit">
         <header>
-          <button type="submit" class="close">&times;</button>
           <h2>{{ $t("settings.title") }}</h2>
+          <button type="submit" class="close">&times;</button>
         </header>
         <section>
           <p>
@@ -71,21 +69,6 @@ const logout = async () => {
 </template>
 
 <style scoped>
-.logout-button {
-  background: #2c3e50;
-  color: #ffffff;
-  padding: 10px;
-  font-family: "Roboto", sans-serif;
-  text-transform: uppercase;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-}
-.logout-button:hover,
-.logout-button:active,
-.logout-button:focus {
-  background: #222f3d;
-}
 input[type="checkbox"] {
   height: 0;
   width: 0;

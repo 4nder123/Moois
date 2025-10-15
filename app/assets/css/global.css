@@ -1,56 +1,39 @@
-input {
+:root {
+  --color-primary: #2c3e50;
+  --color-primary-dark: #222f3d;
+}
+
+body {
   font-family: "Roboto", sans-serif;
+  font-size: 16px;
+}
+
+input {
+  font-family: inherit;
+  font-size: inherit;
   outline: 0;
   background: #f0f0f0;
-  width: 100%;
   border: none;
   padding: 15px;
   box-sizing: border-box;
-  font-size: 14px;
   border-radius: 4px;
-  -webkit-border-radius: 4px;
 }
-.loading {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
+
+button {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 15px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--color-primary);
+  color: #ffffff;
+  text-transform: uppercase;
+  outline: 0;
+  cursor: pointer;
 }
-.loading::after {
-  content: "";
-  width: 100px;
-  aspect-ratio: 4;
-  --_g: no-repeat radial-gradient(circle closest-side, #2c3e50 90%, #0000);
-  background:
-    var(--_g) 0% 50%,
-    var(--_g) 50% 50%,
-    var(--_g) 100% 50%;
-  background-size: calc(100% / 3) 100%;
-  animation: l7 900ms infinite linear;
-}
-@keyframes l7 {
-  33% {
-    background-size:
-      calc(100% / 3) 0%,
-      calc(100% / 3) 100%,
-      calc(100% / 3) 100%;
-  }
-  50% {
-    background-size:
-      calc(100% / 3) 100%,
-      calc(100% / 3) 0%,
-      calc(100% / 3) 100%;
-  }
-  66% {
-    background-size:
-      calc(100% / 3) 100%,
-      calc(100% / 3) 100%,
-      calc(100% / 3) 0%;
-  }
+
+button:hover,
+button:active,
+button:focus {
+  background: var(--color-primary-dark);
 }
