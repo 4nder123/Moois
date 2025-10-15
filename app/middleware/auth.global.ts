@@ -2,22 +2,22 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const authMeta = to.meta.auth as {
     unauthenticatedOnly: boolean;
     navigateUnauthenticatedTo?: string;
-    navigateAuthenticatedTo?: string; 
+    navigateAuthenticatedTo?: string;
   };
 
+  if (import.meta.client) return;
   if (!authMeta) return;
 
-  const {data: session} = await authClient.useSession(useFetch);
+  const { data: session } = await authClient.useSession(useFetch);
   const loggedIn = !!session.value;
 
   if (authMeta.unauthenticatedOnly && loggedIn) {
-    if(to.path === authMeta.navigateAuthenticatedTo) return;
-    return navigateTo(authMeta.navigateAuthenticatedTo);
+    if (to.path === authMeta.navigateAuthenticatedTo) return;
+    return navigateTo(authMeta.navigateAuthenticatedTo, { replace: true });
   }
 
   if (!authMeta.unauthenticatedOnly && !loggedIn) {
     if (to.path === authMeta.navigateUnauthenticatedTo) return;
-    return navigateTo(authMeta.navigateUnauthenticatedTo);
+    return navigateTo(authMeta.navigateUnauthenticatedTo, { replace: true });
   }
 });
-
