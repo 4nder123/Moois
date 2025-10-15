@@ -1,18 +1,18 @@
 <template>
-    <div :class="['msgBox', isError ? 'error' : 'success']">{{ message }}</div>
+  <div :class="['msgBox', isError ? 'error' : 'success']">{{ message }}</div>
 </template>
 
 <script setup lang="ts">
 defineProps<{
-    message: string;
-    isError: boolean;
+  message: string;
+  isError: boolean;
 }>();
 </script>
 
 <style scoped>
 .msgBox {
   width: 100%;
-  margin-bottom: 10px;
+  margin: 0 0 10px;
   padding: 10px;
   box-sizing: border-box;
   border: 1px solid;

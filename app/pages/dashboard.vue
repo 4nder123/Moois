@@ -1,6 +1,11 @@
 <template>
   <div>
-    <SettingsModal v-if="isSettingsVisible" @close="closeSettings" />
+    <LoadingDots ref="loader" />
+    <SettingsModal
+      v-if="isSettingsVisible"
+      @close="closeSettings"
+      @logout="handleLogout"
+    />
     <TimetableView
       v-if="viewParam === 'timetable'"
       @change-view="changeView"
@@ -15,6 +20,7 @@
 </template>
 
 <script setup lang="ts">
+import LoadingDots from "~/components/loadingDots.vue";
 definePageMeta({
   auth: {
     unauthenticatedOnly: false,
@@ -37,6 +43,7 @@ definePageMeta({
 });
 
 const isSettingsVisible = ref(false);
+const loader = ref<InstanceType<typeof LoadingDots> | null>(null);
 const route = useRoute();
 
 const viewParam = computed(() => route.query.view);
@@ -48,6 +55,16 @@ const changeView = () => {
     query: { view: next },
     hash: route.hash,
   });
+};
+
+const handleLogout = async () => {
+  try {
+    loader.value?.start();
+    await authClient.signOut();
+    navigateTo("/login", { replace: true });
+  } finally {
+    loader.value?.stop();
+  }
 };
 
 const showSettings = () => {
