@@ -4,6 +4,7 @@
 }
 
 body {
+  touch-action: manipulation;
   font-family: "Roboto", sans-serif;
   font-size: 16px;
 }
@@ -33,7 +34,6 @@ button {
 }
 
 button:hover,
-button:active,
-button:focus {
+button:active {
   background: var(--color-primary-dark);
 }

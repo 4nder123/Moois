@@ -2,6 +2,11 @@
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
+  nitro: {
+    experimental: {
+      websocket: true
+    },
+  },
   app: { head: { title: "Moois" } },
   modules: [
     "@nuxt/eslint",
@@ -9,6 +14,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "pinia-plugin-persistedstate/nuxt",
     "@nuxt/content",
+    "@prisma/nuxt",
   ],
   css: ["~/assets/css/global.css"],
   i18n: {

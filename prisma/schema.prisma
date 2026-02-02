@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  sessions      Session[]
+
+  homeworkUrl  String?
+  timetableUrl String?
+
+  iCalHomeworkState iCalHomeworkState[]
+  userHomeworks     UserHomework[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("verification")
+}
+
+model iCalHomeworkState {
+  id         String          @id
+  homeworkId String
+  status     Status?
+  color      HighlightColor?
+  userId     String
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("iCalHomeworkState")
+}
+
+model UserHomework {
+  id        String          @id @default(uuid())
+  title     String
+  start     DateTime
+  status    Status?
+  color     HighlightColor?
+  userAdded Boolean         @default(true)
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("userHomework")
+}
+
+enum Status {
+  DONE
+  HIGHLIGHTED
+}
+
+enum HighlightColor {
+  RED
+  YELLOW
+  ORANGE
+}

@@ -23,12 +23,12 @@ defineExpose({
   stop,
 });
 
-onBeforeMount(() => {
+onMounted(() => {
   stop();
 });
 
 onBeforeUnmount(() => {
-  clearTimeout(timeout);
+  stop();
 });
 </script>
 

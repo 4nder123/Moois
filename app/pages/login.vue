@@ -2,9 +2,9 @@
   <div class="auth-page">
     <LoadingDots ref="loader" />
     <div class="auth-form">
-      <MsgBox v-if="message" :message="message" :is-error="msgIsError" />
-      <EmailForm v-if="step === 'email'" @submit="handleEmailSubmit" />
-      <OtpForm v-else @verify="handleVerifyOtp" />
+      <LoginMsgBox v-if="message" :message="message" :is-error="msgIsError" />
+      <LoginEmailForm v-if="step === 'email'" @submit="handleEmailSubmit" />
+      <LoginOtpForm v-else @verify="handleVerifyOtp" />
     </div>
   </div>
 </template>
@@ -71,9 +71,8 @@ async function handleVerifyOtp(otp: string) {
     }
     return navigateTo("/dashboard", { replace: true });
   } catch {
-    setMsgBox($t("auth.errorUnexpected"), true);
-  } finally {
     loader.value?.stop();
+    setMsgBox($t("auth.errorUnexpected"), true);
   }
 }
 </script>

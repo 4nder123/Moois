@@ -1,0 +1,31 @@
+{
+  "settings": {
+    "title": "Settings",
+    "ois": "ÕIS calendar link",
+    "moodle": "Moodle calendar link",
+    "defaultView": {
+      "label": "Default view",
+      "timetable": "Timetable",
+      "homework": "Homework"
+    },
+    "darkMode": "Dark mode",
+    "logout": "Log out"
+  },
+  "auth": {
+    "login": "Log in",
+    "verify": "Verify",
+    "errorLength": "The code must be 6 digits long",
+    "errorCode": "Invalid or expired code",
+    "codeSent": "Code sent to your email address",
+    "codeFailed": "Failed to send code. Please try again.",
+    "tooManyAttempts": "Too many attempts. Please request a new verification code.",
+    "errorUnexpected": "Something went wrong. Please try again."
+  },
+  "homework": {
+    "title": "Homework",
+    "addHomework": "Add homework"
+  },
+  "timetable": {
+    "title": "Timetable"
+  }
+}

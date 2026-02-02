@@ -1,72 +1,104 @@
+<template>
+  <dialog class="modal">
+    <form @submit.prevent="submit">
+      <header>
+        <h2>{{ $t("settings.title") }}</h2>
+        <button type="submit" class="close">&times;</button>
+      </header>
+      <section>
+        <p>
+          {{ $t("settings.ois") }}
+          <input
+            id="ois"
+            name="ois"
+            type="text"
+            class="modal-input"
+            placeholder="Õis"
+            v-model="timetableUrl"
+          />
+        </p>
+        <p>
+          {{ $t("settings.moodle") }}
+          <input
+            id="moodle"
+            name="moodle"
+            type="text"
+            placeholder="Moodle"
+            class="modal-input"
+            v-model="homeworkUrl"
+          />
+        </p>
+        <p>
+          {{ $t("settings.defaultView.label") }}
+          <select v-model="store.defaultView" class="defaultView">
+            <option value="timetable">
+              {{ $t("settings.defaultView.timetable") }}
+            </option>
+            <option value="homework">
+              {{ $t("settings.defaultView.homework") }}
+            </option>
+          </select>
+        </p>
+        <p>
+          {{ $t("settings.darkMode") }}
+          <input id="switch" type="checkbox" />
+          <label for="switch"></label>
+        </p>
+        <p>
+          <button type="button" class="logout-button" @click="logout">
+            {{ $t("settings.logout") }}
+          </button>
+        </p>
+      </section>
+    </form>
+  </dialog>
+</template>
+
 <script setup lang="ts">
 import "~/assets/css/modal.css";
 
+const props = defineProps<{
+  eventUrls: { homework: string; timetable: string };
+}>();
+
+const timetableUrl = ref("");
+const homeworkUrl = ref("");
+
 const store = useDashboardStore();
-const emit = defineEmits(["close", "logout"]);
+
+const emit = defineEmits<{
+  (
+    e: "close",
+    urls: Partial<{ timetableUrl: string; homeworkUrl: string }>,
+  ): void;
+  (e: "logout"): void;
+}>();
 
 const submit = () => {
-  emit("close");
+  const original = props.eventUrls ?? { timetable: "", homework: "" };
+  const changed: Partial<{ timetableUrl: string; homeworkUrl: string }> = {};
+
+  if ((timetableUrl.value ?? "") !== (original.timetable ?? "")) {
+    changed.timetableUrl = timetableUrl.value;
+  }
+  if ((homeworkUrl.value ?? "") !== (original.homework ?? "")) {
+    changed.homeworkUrl = homeworkUrl.value;
+  }
+  emit("close", changed);
 };
 const logout = async () => {
   emit("logout");
 };
-</script>
 
-<template>
-  <div class="background">
-    <div class="modal">
-      <form @submit.prevent="submit">
-        <header>
-          <h2>{{ $t("settings.title") }}</h2>
-          <button type="submit" class="close">&times;</button>
-        </header>
-        <section>
-          <p>
-            {{ $t("settings.ois") }}
-            <input
-              id="ois"
-              name="ois"
-              type="text"
-              class="modal-input"
-              placeholder="Õis"
-            />
-          </p>
-          <p>
-            {{ $t("settings.moodle") }}
-            <input
-              id="moodle"
-              name="moodle"
-              type="text"
-              placeholder="Moodle"
-              class="modal-input"
-            />
-          </p>
-          <p>
-            {{ $t("settings.defaultView.label") }}
-            <select v-model="store.defaultView" class="defaultView">
-              <option value="timetable">
-                {{ $t("settings.defaultView.timetable") }}
-              </option>
-              <option value="homework">
-                {{ $t("settings.defaultView.homework") }}
-              </option>
-            </select>
-          </p>
-          <p>
-            {{ $t("settings.darkMode") }}
-            <input id="switch" type="checkbox" />
-            <label for="switch"></label>
-          </p>
-          <p>
-            <button type="button" class="logout-button" @click="logout">
-              {{ $t("settings.logout") }}
-            </button>
-          </p>
-        </section>
-      </form>
-    </div>
-  </div>
-</template>
+watch(
+  () => props.eventUrls,
+  (v) => {
+    timetableUrl.value = v?.timetable ?? "";
+    homeworkUrl.value = v?.homework ?? "";
+  },
+  { immediate: true },
+);
+</script>
 
 <style scoped>
 input[type="checkbox"] {
