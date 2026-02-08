@@ -16,7 +16,7 @@ FROM node:24-alpine
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install --omit=devd
+RUN npm install --omit=dev
 
 COPY --from=build /app/.output .
 COPY --from=build /app/prisma ./prisma
