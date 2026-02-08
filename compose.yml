@@ -15,7 +15,7 @@ services:
     networks:
       - moois
   db:
-    image: postgres:latest
+    image: postgres:17-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: "${POSTGRES_USER}"
@@ -29,14 +29,13 @@ services:
     build: .
     restart: unless-stopped
     environment:
-      BETTER_AUTH_URL: "${BETTER_AUTH_URL}"
       BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET}"
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
       GMAIL_USER: "${GMAIL_USER}"
       GMAIL_APP_PASSWORD: "${GMAIL_APP_PASSWORD}"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`${BETTER_AUTH_URL}`)"
+      - "traefik.http.routers.frontend.rule=Host(`${MAIN_URL}`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=resolver"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
