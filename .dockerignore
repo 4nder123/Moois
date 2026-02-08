@@ -4,6 +4,7 @@
 .nuxt
 .nitro
 .cache
+.vscode
 dist
 
 # Node dependencies
@@ -18,12 +19,5 @@ logs
 .fleet
 .idea
 
-# Local env files
-.env
-.env.*
-
 /app/generated/prisma
-
 /app/generated/prisma
-
-.vscode
