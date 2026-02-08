@@ -3,34 +3,41 @@
     <form @submit.prevent="submit">
       <header>
         <h2>{{ $t("settings.title") }}</h2>
-        <button type="submit" class="close">&times;</button>
+        <div class="header-actions">
+          <select v-model="selectedLocale" class="langSelect" aria-label="Language">
+            <option v-for="loc in availableLocales" :key="loc.code" :value="loc.code">
+              {{ loc.name }}
+            </option>
+          </select>
+          <button type="submit" class="close">&times;</button>
+        </div>
       </header>
       <section>
         <p>
           {{ $t("settings.ois") }}
           <input
             id="ois"
+            v-model="timetableUrl"
             name="ois"
             type="text"
             class="modal-input"
             placeholder="Õis"
-            v-model="timetableUrl"
           />
         </p>
         <p>
           {{ $t("settings.moodle") }}
           <input
             id="moodle"
+            v-model="homeworkUrl"
             name="moodle"
             type="text"
             placeholder="Moodle"
             class="modal-input"
-            v-model="homeworkUrl"
           />
         </p>
         <p>
           {{ $t("settings.defaultView.label") }}
-          <select v-model="store.defaultView" class="defaultView">
+          <select v-model="dashboardStore.defaultView" class="defaultView">
             <option value="timetable">
               {{ $t("settings.defaultView.timetable") }}
             </option>
@@ -41,7 +48,7 @@
         </p>
         <p>
           {{ $t("settings.darkMode") }}
-          <input id="switch" type="checkbox" />
+          <input id="switch" type="checkbox" v-model="isDarkMode" />
           <label for="switch"></label>
         </p>
         <p>
@@ -64,7 +71,25 @@ const props = defineProps<{
 const timetableUrl = ref("");
 const homeworkUrl = ref("");
 
-const store = useDashboardStore();
+const dashboardStore = useDashboardStore();
+const { locale, locales, setLocale } = useI18n();
+const colorMode = useColorMode();
+const selectedLocale = ref(locale.value);
+const availableLocales = computed(() =>
+  (locales.value as Array<{ code: string; name?: string }>)
+    .filter((l) => l.code)
+    .map((l) => ({
+      code: l.code,
+      name: l.name ?? l.code.toUpperCase(),
+    })),
+);
+
+const isDarkMode = computed({
+  get: () => colorMode.value === "dark",
+  set: (value: boolean) => {
+    colorMode.preference = value ? "dark" : "light";
+  },
+});
 
 const emit = defineEmits<{
   (
@@ -89,6 +114,21 @@ const submit = () => {
 const logout = async () => {
   emit("logout");
 };
+
+watch(
+  () => locale.value,
+  (value) => {
+    if (selectedLocale.value !== value) selectedLocale.value = value;
+  },
+);
+
+watch(
+  () => selectedLocale.value,
+  async (value) => {
+    if (!value || value === locale.value) return;
+    await setLocale(value);
+  },
+);
 
 watch(
   () => props.eventUrls,
@@ -137,6 +177,31 @@ input:checked + label[for="switch"] {
 input:checked + label[for="switch"]:after {
   left: calc(100% - 5px);
   transform: translateX(-100%);
+}
+
+.header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.langSelect {
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 14px;
+}
+
+.langSelect option {
+  color: #111111;
+  background: #ffffff;
+}
+
+.langSelect:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.8);
 }
 
 .defaultView {

@@ -5,6 +5,10 @@ interface EventBase {
   end: number;
 }
 
+export type EventStatus = "highlighted" | "done" | "";
+
+export type HighColor = "red" | "orange" | "yellow";
+
 export interface TimetableEvent extends EventBase {
   allDay: boolean;
   color: string;
@@ -16,8 +20,8 @@ export interface TimetableEvent extends EventBase {
 export interface HomeworkEvent extends EventBase {
   extendedProps: {
     userAdded: boolean;
-    status: "high" | "done" | "";
-    color: string;
+    status: EventStatus;
+    color: HighColor | "";
   };
 }
 

@@ -1,8 +1,5 @@
 import axios from "axios";
 import icsTimetableConverter from "~~/server/services/icsTimetableConverter";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
 
 const allowedHosts = ["ois2", "tahvel"];
 
@@ -21,7 +18,7 @@ export const getEvents = async (userId: string) => {
     if (!allowedHosts.some((host) => url.hostname.includes(host)))
       throw createError({ statusCode: 400, message: "Invalid URL host" });
 
-    const { data } = await axios.get(url.toString());
+    const { data } = await axios.get(url.toString(), { timeout: 8000 });
     return await icsTimetableConverter(data.toString());
   } catch {
     throw createError({

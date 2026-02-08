@@ -1,9 +1,52 @@
 import { betterAuth } from "better-auth";
 import { emailOTP } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { PrismaClient } from "@prisma/client";
+import nodemailer from "nodemailer";
+import { prisma } from "./prisma";
 
-const prisma = new PrismaClient();
+const gmailUser = process.env.GMAIL_USER;
+const gmailPass = process.env.GMAIL_APP_PASSWORD;
+
+const transporter = gmailUser && gmailPass
+  ? nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: gmailUser,
+        pass: gmailPass,
+      },
+    })
+  : null;
+
+const getLocale = (request?: Request) => {
+  const cookieHeader = request?.headers.get("cookie") ?? "";
+  const cookieMatch = cookieHeader.match(
+    /(?:^|;\s*)(i18n_redirected|i18n_locale|locale)=([^;]+)/i
+  );
+  const cookieLocale = cookieMatch?.[2]?.toLowerCase();
+  if (cookieLocale?.startsWith("et")) return "et";
+
+  const acceptLanguage = request?.headers
+    .get("accept-language")
+    ?.toLowerCase();
+  if (acceptLanguage?.includes("et")) return "et";
+
+  return "en";
+};
+
+const signInCopy = {
+  en: {
+    subject: "Your sign-in code",
+    text: (otp: string) => `Your sign-in code is: ${otp}`,
+    html: (otp: string) =>
+      `<p>Your sign-in code is:</p><p><strong>${otp}</strong></p>`,
+  },
+  et: {
+    subject: "Sisselogimise kood",
+    text: (otp: string) => `Sinu sisselogimise kood on: ${otp}`,
+    html: (otp: string) =>
+      `<p>Sinu sisselogimise kood on:</p><p><strong>${otp}</strong></p>`,
+  },
+} as const;
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -15,7 +58,7 @@ export const auth = betterAuth({
     "http://192.168.1.241:3000",
   ],
   session: {
-    maxAge: 60 * 60 * 24 * 30,
+    expiresIn: 60 * 60 * 24 * 30,
     updateAge: 60 * 60 * 24,
   },
   advanced: {
@@ -37,10 +80,23 @@ export const auth = betterAuth({
   plugins: [
     emailOTP({
       storeOTP: "hashed",
-      async sendVerificationOTP({ email, otp, type }) {
-        if (type === "sign-in") {
-          console.log(`Sign-in OTP for ${email}: ${otp}`);
+      async sendVerificationOTP({ email, otp, type }, request) {
+        if (type !== "sign-in") return;
+        const locale = getLocale(request);
+        const subject = signInCopy[locale].subject;
+        const body = signInCopy[locale];
+        if (!transporter) {
+          console.warn("Gmail credentials are not set; cannot send OTP email.");
+          console.log(`OTP for ${email} (${type}): ${otp}`);
+          return;
         }
+        await transporter.sendMail({
+          from: `Moois <${gmailUser}>`,
+          to: email,
+          subject,
+          text: body.text(otp),
+          html: body.html(otp),
+        });
       },
     }),
   ],

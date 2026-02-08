@@ -8,6 +8,7 @@
       "timetable": "Tunniplaan",
       "homework": "Kodutoo"
     },
+    "language": "Keel",
     "darkMode": "Tume režiim",
     "logout": "Logi välja"
   },
@@ -23,9 +24,23 @@
   },
   "homework": {
     "title": "Kodutöö",
-    "addHomework": "Lisa kodutöö"
+    "delete": "Kustuta"
   },
   "timetable": {
     "title": "Tunniplaan"
+  },
+  "addEvent": {
+    "title": "Lisa kodutöö",
+    "subject": "Kodutöö pealkiri:",
+    "dueDate": "Kuupäev:",
+    "subjectPlaceholder": "Sisesta pealkiri"
+  },
+  "filter":{
+    "title": "Filter",
+    "showDone": "Näita tehtuid",
+    "color": "Värv",
+    "red": "Punane",
+    "orange": "Oranž",
+    "yellow": "Kollane"
   }
 }

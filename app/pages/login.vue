@@ -23,6 +23,7 @@ const loader = ref<InstanceType<typeof LoadingDots> | null>(null);
 const email = ref("");
 const message = ref("");
 const msgIsError = ref(false);
+const localePath = useLocalePath();
 
 function setMsgBox(msg: string, isError = false) {
   message.value = msg;
@@ -67,12 +68,13 @@ async function handleVerifyOtp(otp: string) {
         error.code === "TOO_MANY_ATTEMPTS"
           ? $t("auth.tooManyAttempts")
           : $t("auth.errorCode");
+      loader.value?.stop();
       return setMsgBox(errorMessage, true);
     }
-    return navigateTo("/dashboard", { replace: true });
+    return navigateTo(localePath("/dashboard"), { replace: true });
   } catch {
-    loader.value?.stop();
     setMsgBox($t("auth.errorUnexpected"), true);
+    loader.value?.stop();
   }
 }
 </script>

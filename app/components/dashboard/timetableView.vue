@@ -5,7 +5,8 @@
 
 <script lang="ts" setup>
 import FullCalendar from "@fullcalendar/vue3";
-import Locale from "@fullcalendar/core/locales/et";
+import EtLocale from "@fullcalendar/core/locales/et";
+import EnGbLocale from "@fullcalendar/core/locales/en-gb";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import Popover from "./popoverBase.vue";
 import type {
@@ -20,6 +21,11 @@ const props = defineProps<{ events: TimetableEvents }>();
 const popover = ref<InstanceType<typeof Popover> | null>(null);
 const timetable = ref<InstanceType<typeof FullCalendar> | null>(null);
 const description = ref<string>("");
+const { locale } = useI18n();
+
+const calendarLocale = computed(() =>
+  locale.value === "et" ? EtLocale : EnGbLocale,
+);
 
 const getWeekStart = (d: DateInput) => {
   const date = new Date(String(d)),
@@ -50,7 +56,7 @@ const calendarOptions = {
     },
   },
   hiddenDays: [0, 6],
-  locale: Locale,
+  locale: calendarLocale.value,
   timeZone: "Europe/Tallinn",
   initialView: "timeGridWeek",
   nowIndicator: true,
@@ -72,11 +78,14 @@ const calendarOptions = {
 };
 
 watch(
-  () => props.events,
+  () => [props.events, calendarLocale.value],
   () => {
     const api = (timetable.value as any)?.getApi?.();
     if (api && typeof api.refetchEvents === "function") {
       api.refetchEvents();
+    }
+    if (api && typeof api.setOption === "function") {
+      api.setOption("locale", calendarLocale.value);
     }
   },
   { deep: true },
@@ -84,9 +93,6 @@ watch(
 </script>
 
 <style>
-.popover-anchor {
-  anchor-name: --popover-anchor;
-}
 @media (max-width: 500px) {
   .timetable .fc .fc-toolbar.fc-header-toolbar {
     font-size: 3.2vw;

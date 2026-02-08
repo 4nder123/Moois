@@ -1,0 +1,141 @@
+.dark body {
+  background-color: #121212;
+  color: #bbbbbb !important;
+  --popover-bg-color:#3f3f3f;
+  --popover-border-color:#2f2f3f;
+  --popover-text-color:#bbbbbb;
+  --main-bg-color: #121212;
+  --fc-border-color: #3f3f3f;
+  --fc-page-bg-color: #3f3f3f;
+  --fc-today-bg-color: rgba(75, 75, 75, 0.3);
+}
+
+.dark .fc-list-event {
+  --fc-list-event-hover-bg-color: rgba(100, 100, 100, 0.15);
+}
+
+.dark .fc-timegrid-event-harness,
+.dark .fc-daygrid-event-harness {
+  filter: brightness(70%);
+}
+
+.dark .shadow {
+  color: #3f3f3f;
+}
+
+.dark .modal,
+.dark .modal section,
+.dark .form,
+.dark .fc-list-empty,
+.dark .fc-list-day-cushion {
+  background: #242424 !important;
+  color: #bbbbbb !important;
+}
+
+.dark .form .message a {
+  color: #888 !important;
+  text-decoration: none;
+}
+
+.dark input,
+.dark .pv-select {
+  color: #bbbbbb !important;
+  background: #3d3d3d !important;
+}
+
+.dark .defaultView {
+  color: #bbbbbb !important;
+  background: #3d3d3d !important;
+}
+
+.dark .langSelect {
+  color: #bbbbbb !important;
+  background: transparent !important;
+}
+
+.dark .langSelect option {
+  color: #bbbbbb !important;
+  background: #3d3d3d !important;
+}
+
+.dark .flatpickr-calendar {
+  background-color: #3d3d3d !important;
+  -webkit-box-shadow: 1px 0 0 #3f3f3f, -1px 0 0 #3f3f3f, 0 1px 0 #3f3f3f, 0 -1px 0 #3f3f3f, 0 3px 13px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 1px 0 0 #3f3f3f, -1px 0 0 #3f3f3f, 0 1px 0 #3f3f3f, 0 -1px 0 #3f3f3f, 0 3px 13px rgba(0, 0, 0, 0.08) !important;
+}
+
+.dark .flatpickr-day,
+.dark span.flatpickr-weekday,
+.dark .flatpickr-current-month,
+.dark .flatpickr-months .flatpickr-prev-month,
+.dark .flatpickr-months .flatpickr-next-month,
+.dark .flatpickr-time input {
+  color: #bbbbbb !important;
+  fill: #bbbbbb !important;
+}
+
+.dark .numInputWrapper span.arrowUp:after,
+.dark .numInputWrapper span.arrowDown:after {
+  border-bottom-color: #bbbbbb !important;
+  border-top-color: #bbbbbb !important;
+}
+
+.dark .flatpickr-current-month .flatpickr-monthDropdown-months .flatpickr-monthDropdown-month {
+  background: #4f4f4f !important;
+}
+
+.dark .flatpickr-day.inRange,
+.dark .flatpickr-day.prevMonthDay.inRange,
+.dark .flatpickr-day.nextMonthDay.inRange,
+.dark .flatpickr-day.today.inRange,
+.dark .flatpickr-day.prevMonthDay.today.inRange,
+.dark .flatpickr-day.nextMonthDay.today.inRange,
+.dark .flatpickr-day:hover,
+.dark .flatpickr-day.prevMonthDay:hover,
+.dark .flatpickr-day.nextMonthDay:hover,
+.dark .flatpickr-day:focus,
+.dark .flatpickr-day.prevMonthDay:focus,
+.dark .flatpickr-day.nextMonthDay:focus,
+.dark .flatpickr-day.flatpickr-disabled:hover {
+  background-color: #4f4f4f !important;
+  border-color: #4f4f4f !important;
+}
+
+.dark .flatpickr-day.nextMonthDay,
+.dark .flatpickr-day.prevMonthDay {
+  color: #777 !important;
+}
+
+.dark .flatpickr-time input:hover,
+.dark .flatpickr-time input:focus {
+  background-color: #4f4f4f !important;
+}
+
+.dark .flatpickr-day.today {
+  border-color: #4f4f4f !important;
+}
+
+.dark .flatpickr-day.flatpickr-disabled {
+  color: #4f4f4f !important;
+}
+
+.dark .flatpickr-day.flatpickr-disabled:hover {
+  color: #777 !important;
+}
+
+.dark .error {
+  background-color: #4D2E2E !important;
+  border: 1px solid #4D2828 !important;
+  color: #FFB3B3 !important;
+}
+
+.dark .success {
+  background-color: #A9E8A0 !important;
+  border: 1px solid #88C788 !important;
+  color: #3C6A3C !important;
+}
+
+.dark .auth-form {
+  background: #242424 !important;
+  color: #bbbbbb !important;
+}

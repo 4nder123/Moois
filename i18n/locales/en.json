@@ -8,6 +8,7 @@
       "timetable": "Timetable",
       "homework": "Homework"
     },
+    "language": "Language",
     "darkMode": "Dark mode",
     "logout": "Log out"
   },
@@ -17,15 +18,29 @@
     "errorLength": "The code must be 6 digits long",
     "errorCode": "Invalid or expired code",
     "codeSent": "Code sent to your email address",
-    "codeFailed": "Failed to send code. Please try again.",
+    "codeFailed": "Failed to send the code. Try again.",
     "tooManyAttempts": "Too many attempts. Please request a new verification code.",
-    "errorUnexpected": "Something went wrong. Please try again."
+    "errorUnexpected": "Something went wrong. Try again."
   },
   "homework": {
-    "title": "Homework",
-    "addHomework": "Add homework"
+    "title": "homework",
+    "delete": "Delete"
   },
   "timetable": {
-    "title": "Timetable"
+    "title": "timetable"
+  },
+  "addEvent": {
+    "title": "Add homework",
+    "subject": "Homework title:",
+    "dueDate": "Date:",
+    "subjectPlaceholder": "Enter title"
+  },
+  "filter": {
+    "title": "Filter",
+    "showDone": "Show completed",
+    "color": "Color",
+    "red": "Red",
+    "orange": "Orange",
+    "yellow": "Yellow"
   }
 }

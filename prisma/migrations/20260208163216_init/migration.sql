@@ -1,8 +1,8 @@
 -- CreateEnum
-CREATE TYPE "Status" AS ENUM ('DONE', 'HIGHLIGHTED');
+CREATE TYPE "Status" AS ENUM ('done', 'highlighted');
 
 -- CreateEnum
-CREATE TYPE "HighlightColor" AS ENUM ('RED', 'YELLOW', 'ORANGE');
+CREATE TYPE "HighlightColor" AS ENUM ('red', 'yellow', 'orange');
 
 -- CreateTable
 CREATE TABLE "user" (
@@ -73,6 +73,9 @@ CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "session_token_key" ON "session"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "iCalHomeworkState_userId_homeworkId_key" ON "iCalHomeworkState"("userId", "homeworkId");
 
 -- AddForeignKey
 ALTER TABLE "session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -44,17 +44,37 @@ const parseEvent = async (event: VEVENT): Promise<HomeworkEvent> => {
   };
 };
 
+const getDayKey = (time: number) => new Date(time).toISOString().split("T")[0];
+
+const baseTitle = (title: string) => title.replace(/\w+[.!?]?$/, "");
+
 export default async function convertIcsToHomework(
   icsData: string,
 ): Promise<HomeworkEvent[]> {
   const icsObject = ical.parseICS(icsData);
+  const map = new Map<string, HomeworkEvent[]>();
 
-  const eventPromises = Object.values(icsObject)
-    .filter((event) => event.type === "VEVENT")
-    .map(async (eventObj) => {
-      return await parseEvent(eventObj as VEVENT);
-    });
+  for (const events of Object.values(icsObject)) {
+    if (events.type !== "VEVENT") continue;
 
-  const events = await Promise.all(eventPromises);
-  return events;
+    const event = await parseEvent(events as VEVENT);
+    const key = getDayKey(event.start);
+
+    if (!map.has(key)) map.set(key, []);
+    const dayEvents = map.get(key);
+
+    const baseEvTitle = baseTitle(event.title);
+    const duplicateEvent = dayEvents?.find(
+      (ev) => baseTitle(ev.title) === baseEvTitle,
+    );
+
+    if (duplicateEvent) {
+      duplicateEvent.title = baseEvTitle;
+      duplicateEvent.end = event.start;
+    } else {
+      dayEvents?.push(event);
+    }
+  }
+
+  return Array.from(map.values()).flat();
 }

@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -53,13 +52,14 @@ model Verification {
 }
 
 model iCalHomeworkState {
-  id         String          @id
+  id         String          @id @default(uuid())
   homeworkId String
   status     Status?
   color      HighlightColor?
   userId     String
   user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, homeworkId])
   @@map("iCalHomeworkState")
 }
 
@@ -77,12 +77,12 @@ model UserHomework {
 }
 
 enum Status {
-  DONE
-  HIGHLIGHTED
+  done
+  highlighted
 }
 
 enum HighlightColor {
-  RED
-  YELLOW
-  ORANGE
+  red
+  yellow
+  orange
 }
