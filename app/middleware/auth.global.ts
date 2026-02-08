@@ -15,12 +15,16 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (authMeta.unauthenticatedOnly && loggedIn) {
     if (to.path === authMeta.navigateAuthenticatedTo) return;
     if (!authMeta.navigateAuthenticatedTo) return;
-    return navigateTo(localePath(authMeta.navigateAuthenticatedTo), { replace: true });
+    return navigateTo(localePath(authMeta.navigateAuthenticatedTo), {
+      replace: true,
+    });
   }
 
   if (!authMeta.unauthenticatedOnly && !loggedIn) {
     if (to.path === authMeta.navigateUnauthenticatedTo) return;
     if (!authMeta.navigateUnauthenticatedTo) return;
-    return navigateTo(localePath(authMeta.navigateUnauthenticatedTo), { replace: true });
+    return navigateTo(localePath(authMeta.navigateUnauthenticatedTo), {
+      replace: true,
+    });
   }
 });

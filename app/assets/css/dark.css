@@ -1,9 +1,9 @@
 .dark body {
   background-color: #121212;
   color: #bbbbbb !important;
-  --popover-bg-color:#3f3f3f;
-  --popover-border-color:#2f2f3f;
-  --popover-text-color:#bbbbbb;
+  --popover-bg-color: #3f3f3f;
+  --popover-border-color: #2f2f3f;
+  --popover-text-color: #bbbbbb;
   --main-bg-color: #121212;
   --fc-border-color: #3f3f3f;
   --fc-page-bg-color: #3f3f3f;
@@ -60,8 +60,18 @@
 
 .dark .flatpickr-calendar {
   background-color: #3d3d3d !important;
-  -webkit-box-shadow: 1px 0 0 #3f3f3f, -1px 0 0 #3f3f3f, 0 1px 0 #3f3f3f, 0 -1px 0 #3f3f3f, 0 3px 13px rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 1px 0 0 #3f3f3f, -1px 0 0 #3f3f3f, 0 1px 0 #3f3f3f, 0 -1px 0 #3f3f3f, 0 3px 13px rgba(0, 0, 0, 0.08) !important;
+  -webkit-box-shadow:
+    1px 0 0 #3f3f3f,
+    -1px 0 0 #3f3f3f,
+    0 1px 0 #3f3f3f,
+    0 -1px 0 #3f3f3f,
+    0 3px 13px rgba(0, 0, 0, 0.08) !important;
+  box-shadow:
+    1px 0 0 #3f3f3f,
+    -1px 0 0 #3f3f3f,
+    0 1px 0 #3f3f3f,
+    0 -1px 0 #3f3f3f,
+    0 3px 13px rgba(0, 0, 0, 0.08) !important;
 }
 
 .dark .flatpickr-day,
@@ -80,7 +90,10 @@
   border-top-color: #bbbbbb !important;
 }
 
-.dark .flatpickr-current-month .flatpickr-monthDropdown-months .flatpickr-monthDropdown-month {
+.dark
+  .flatpickr-current-month
+  .flatpickr-monthDropdown-months
+  .flatpickr-monthDropdown-month {
   background: #4f4f4f !important;
 }
 
@@ -124,15 +137,15 @@
 }
 
 .dark .error {
-  background-color: #4D2E2E !important;
-  border: 1px solid #4D2828 !important;
-  color: #FFB3B3 !important;
+  background-color: #4d2e2e !important;
+  border: 1px solid #4d2828 !important;
+  color: #ffb3b3 !important;
 }
 
 .dark .success {
-  background-color: #A9E8A0 !important;
-  border: 1px solid #88C788 !important;
-  color: #3C6A3C !important;
+  background-color: #a9e8a0 !important;
+  border: 1px solid #88c788 !important;
+  color: #3c6a3c !important;
 }
 
 .dark .auth-form {

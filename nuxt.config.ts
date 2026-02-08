@@ -42,6 +42,6 @@ export default defineNuxtConfig({
     preference: "system",
     fallback: "light",
     storageKey: "color-mode",
-    storage: 'cookie',
+    storage: "cookie",
   },
 });

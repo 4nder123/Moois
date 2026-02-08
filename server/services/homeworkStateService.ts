@@ -1,5 +1,5 @@
 import type { HighlightColor, Status } from "@prisma/client";
-import { HomeworkEvent } from "~~/shared/types/event.types";
+import type { HomeworkEvent } from "~~/shared/types/event.types";
 
 export type HomeworkStateUpdate = {
   userId: string;
@@ -21,10 +21,14 @@ export const upsertHomeworkState = async (data: HomeworkStateUpdate) => {
   await prisma.iCalHomeworkState.upsert({
     where: { userId_homeworkId: { userId, homeworkId } },
     update: { status: status || null, color: color || null },
-    create: { userId, homeworkId, status: status || null, color: color || null },
+    create: {
+      userId,
+      homeworkId,
+      status: status || null,
+      color: color || null,
+    },
   });
 };
-
 
 export const addHomework = async (event: HomeworkEvent, userId: string) => {
   await prisma.userHomework.create({

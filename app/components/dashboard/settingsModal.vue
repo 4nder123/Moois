@@ -4,8 +4,16 @@
       <header>
         <h2>{{ $t("settings.title") }}</h2>
         <div class="header-actions">
-          <select v-model="selectedLocale" class="langSelect" aria-label="Language">
-            <option v-for="loc in availableLocales" :key="loc.code" :value="loc.code">
+          <select
+            v-model="selectedLocale"
+            class="langSelect"
+            aria-label="Language"
+          >
+            <option
+              v-for="loc in availableLocales"
+              :key="loc.code"
+              :value="loc.code"
+            >
               {{ loc.name }}
             </option>
           </select>
@@ -48,7 +56,7 @@
         </p>
         <p>
           {{ $t("settings.darkMode") }}
-          <input id="switch" type="checkbox" v-model="isDarkMode" />
+          <input id="switch" v-model="isDarkMode" type="checkbox" />
           <label for="switch"></label>
         </p>
         <p>

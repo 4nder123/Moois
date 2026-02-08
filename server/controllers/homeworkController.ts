@@ -32,7 +32,9 @@ const attachExtendedProps = async (userId: string, events: HomeworkEvent[]) => {
   });
 };
 
-const getUserHomeworkEvents = async (userId: string): Promise<HomeworkEvent[]> => {
+const getUserHomeworkEvents = async (
+  userId: string,
+): Promise<HomeworkEvent[]> => {
   const userHomeworks = await prisma.userHomework.findMany({
     where: { userId },
     select: { id: true, title: true, start: true, status: true, color: true },

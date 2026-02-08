@@ -80,7 +80,7 @@ const calendarOptions = {
 watch(
   () => [props.events, calendarLocale.value],
   () => {
-    const api = (timetable.value as any)?.getApi?.();
+    const api = timetable.value?.getApi?.();
     if (api && typeof api.refetchEvents === "function") {
       api.refetchEvents();
     }

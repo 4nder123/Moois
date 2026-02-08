@@ -78,14 +78,18 @@ const timetableEvents = computed<TimetableEvents>(() => {
   return (timetableData.value ?? {}) as TimetableEvents;
 });
 const homeworkEvents = computed<HomeworkEvent[]>(() => {
-  return (homeworkData.value?.filter(e => !store.filter.includes(e.extendedProps.status) && !store.filter.includes(e.extendedProps.color)) ?? []) as HomeworkEvent[];
+  return (homeworkData.value?.filter(
+    (e) =>
+      !store.filter.includes(e.extendedProps.status) &&
+      !store.filter.includes(e.extendedProps.color),
+  ) ?? []) as HomeworkEvent[];
 });
 
 const eventUrls = computed(() => {
-  const user = (session.value?.user as any) || {};
+  const user = session.value?.user as User;
   return {
-    timetable: user.timetableUrl ?? "",
-    homework: user.homeworkUrl ?? "",
+    timetable: user?.timetableUrl ?? "",
+    homework: user?.homeworkUrl ?? "",
   };
 });
 
@@ -130,7 +134,16 @@ const updateHomeworkState = async (event: {
   color: HighColor | "";
 }) => {
   homeworkData.value = homeworkData.value?.map((e) =>
-    e.id === event.id ? { ...e, extendedProps: { ...e.extendedProps, status: event.status, color: event.color } } : e,
+    e.id === event.id
+      ? {
+          ...e,
+          extendedProps: {
+            ...e.extendedProps,
+            status: event.status,
+            color: event.color,
+          },
+        }
+      : e,
   );
 };
 
@@ -142,21 +155,25 @@ const removeHomeworkEvent = (event: { id: string }) => {
   homeworkData.value = homeworkData.value?.filter((e) => e.id !== event.id);
 };
 
-const HomeworkEventUpdated = (event: { id: string; status: EventStatus; color: HighColor | ""; userAdded: boolean }) => {
+const HomeworkEventUpdated = (event: {
+  id: string;
+  status: EventStatus;
+  color: HighColor | "";
+  userAdded: boolean;
+}) => {
   updateHomeworkState(event);
   socket.emit("event-updated", event);
-}
+};
 
 const HomeworkEventAdded = (event: HomeworkEvent) => {
   addHomeworkEvent(event);
   socket.emit("event-added", event);
-}
+};
 
 const HomeworkEventRemoved = (event: { id: string }) => {
   removeHomeworkEvent(event);
   socket.emit("event-removed", event);
-}
-
+};
 
 const showSettings = () => {
   settingsModal.value?.$el.showModal();
@@ -172,9 +189,9 @@ const closeSettings = async (
     await authClient.updateUser({
       ...changed,
       fetchOptions: { method: "POST" },
-    } as any);
+    });
 
-    const refreshers: Promise<any>[] = [];
+    const refreshers: Promise<void>[] = [];
     if ("homeworkUrl" in changed) {
       refreshers.push(refreshHomework());
     }
@@ -190,10 +207,13 @@ const closeSettings = async (
 };
 
 const startAutoRefresh = () => {
-  refreshInterval = setInterval(() => {
-    refreshTimetable();
-    refreshHomework();
-  }, 30 * 60 * 1000);
+  refreshInterval = setInterval(
+    () => {
+      refreshTimetable();
+      refreshHomework();
+    },
+    30 * 60 * 1000,
+  );
 };
 
 const stopAutoRefresh = () => {
@@ -202,7 +222,6 @@ const stopAutoRefresh = () => {
     refreshInterval = null;
   }
 };
-
 
 onMounted(() => {
   socket.connect();
@@ -229,7 +248,6 @@ onBeforeMount(() => {
 
 <style>
 .fc-icon {
-  pointer-events: none;
   mask-repeat: no-repeat;
   mask-size: contain;
   mask-position: center;
@@ -256,6 +274,7 @@ onBeforeMount(() => {
   -webkit-mask-image: url(/icons/trash.svg);
   mask-image: url(/icons/trash.svg);
   background-color: currentColor;
+  pointer-events: none;
   max-width: 14px;
 }
 
@@ -263,6 +282,7 @@ onBeforeMount(() => {
   -webkit-mask-image: url(/icons/check.svg);
   mask-image: url(/icons/check.svg);
   background-color: currentColor;
+  pointer-events: none;
   max-width: 14px;
 }
 

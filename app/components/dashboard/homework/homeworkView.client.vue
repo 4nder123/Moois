@@ -1,5 +1,9 @@
 <template>
-  <AddEvent ref="addEventModal" @close="closeAddEvent" @event-added="emitAddEvent"/>
+  <AddEvent
+    ref="addEventModal"
+    @close="closeAddEvent"
+    @event-added="emitAddEvent"
+  />
   <FilterModal ref="filterModal" @close="closeFilterModal" />
   <Popover ref="popover" position="left">
     <div @click="onColorSelect">
@@ -8,17 +12,28 @@
       <div class="box yellow"></div>
     </div>
   </Popover>
-  <FullCalendar class="listView" ref="homeworkList" :options="calendarOptions">
+  <FullCalendar ref="homeworkList" class="listView" :options="calendarOptions">
     <template #eventContent="arg">
-      <div class="event" :class="arg.event.extendedProps.color" :data-event-id="arg.event.id">
+      <div
+        class="event"
+        :class="arg.event.extendedProps.color"
+        :data-event-id="arg.event.id"
+      >
         <div class="eventTitle" :class="arg.event.extendedProps.status">
           {{ arg.event.title }}
         </div>
         <div v-long-press class="eventButton" @onLongPress="onLongPress">
           <div
-            v-if="(arg.event.extendedProps.userAdded && isDelete) || arg.event.extendedProps.status !== 'done'"
+            v-if="
+              (arg.event.extendedProps.userAdded && isDelete) ||
+              arg.event.extendedProps.status !== 'done'
+            "
             class="fc-icon"
-            :class="arg.event.extendedProps.userAdded && isDelete ? 'fc-icon-trash' : 'highlightIcon'"
+            :class="
+              arg.event.extendedProps.userAdded && isDelete
+                ? 'fc-icon-trash'
+                : 'highlightIcon'
+            "
           ></div>
         </div>
       </div>
@@ -40,9 +55,16 @@ import FilterModal from "./filterModal.vue";
 
 const store = useDashboardStore();
 const emit = defineEmits<{
-  (e: "show-settings"): void;
-  (e: "change-view"): void;
-  (e: "event-updated", payload: { id: string; status: EventStatus; color: HighColor | ""; userAdded: boolean }): void;
+  (e: "show-settings" | "change-view"): void;
+  (
+    e: "event-updated",
+    payload: {
+      id: string;
+      status: EventStatus;
+      color: HighColor | "";
+      userAdded: boolean;
+    },
+  ): void;
   (e: "event-added", payload: HomeworkEvent): void;
   (e: "event-removed", payload: { id: string }): void;
 }>();
@@ -63,7 +85,9 @@ const onLongPress = (event: Event) => {
   const targetElement = event.currentTarget as HTMLElement;
   const highlightIcon = targetElement.querySelector(".highlightIcon");
   if (highlightIcon) {
-    const eventEl = targetElement.closest("[data-event-id]") as HTMLElement | null;
+    const eventEl = targetElement.closest(
+      "[data-event-id]",
+    ) as HTMLElement | null;
     selectedEventId.value = eventEl?.dataset.eventId ?? null;
     popover.value?.showPopover(highlightIcon as HTMLElement);
   }
@@ -95,18 +119,20 @@ const eventClick = (eventClick: EventClickArg) => {
     emit("event-removed", { id: event.id });
     return;
   }
-
+  console.log({ isHighlightClick, isDeleteClick });
   const isHighlighted = event.extendedProps.status === "highlighted";
   const isDone = event.extendedProps.status === "done";
 
   const status = isHighlightClick
-    ? (isHighlighted ? "" : "highlighted")
-    : (isDone ? "" : "done");
+    ? isHighlighted
+      ? ""
+      : "highlighted"
+    : isDone
+      ? ""
+      : "done";
 
   const color =
-    isHighlightClick && status === "highlighted"
-      ? store.highlightColor
-      : "";
+    isHighlightClick && status === "highlighted" ? store.highlightColor : "";
 
   emit("event-updated", {
     id: event.id,
@@ -115,7 +141,6 @@ const eventClick = (eventClick: EventClickArg) => {
     userAdded: event.extendedProps.userAdded,
   });
 };
-
 
 const setVisibleRange = (): DateRangeInput => {
   if (props.events.length === 0) return {};
@@ -145,10 +170,10 @@ const calendarOptions = {
       icon: "addEvent",
       click: () => addEventModal.value?.$el.show(),
     },
-    filter: { 
-      text: $t("filter.title"), 
-      icon: "filter", 
-      click: () => filterModal.value?.$el.showModal() 
+    filter: {
+      text: $t("filter.title"),
+      icon: "filter",
+      click: () => filterModal.value?.$el.showModal(),
     },
     trash: {
       text: $t("homework.delete"),
@@ -173,11 +198,12 @@ const calendarOptions = {
 };
 const toggleDelete = (e: Event | { target: HTMLElement }) => {
   isDelete.value = !isDelete.value;
-  const iconElement = (e.target as HTMLElement).querySelector('span');
+  const iconElement = (e.target as HTMLElement).querySelector("span");
   if (iconElement) {
-    if (isDelete.value) return iconElement.classList.replace("fc-icon-trash", "fc-icon-check");
+    if (isDelete.value)
+      return iconElement.classList.replace("fc-icon-trash", "fc-icon-check");
     iconElement.classList.replace("fc-icon-check", "fc-icon-trash");
-  } 
+  }
 };
 
 const emitAddEvent = (event: HomeworkEvent) => {
@@ -194,12 +220,12 @@ const closeFilterModal = () => {
 };
 
 const onScroll = () => {
-    const toolbar = document.querySelector(".listView .fc-header-toolbar");
-    if (window.scrollY > 2) {
-        toolbar?.classList.add("shadow");
-    } else {
-        toolbar?.classList.remove("shadow");
-    }
+  const toolbar = document.querySelector(".listView .fc-header-toolbar");
+  if (window.scrollY > 2) {
+    toolbar?.classList.add("shadow");
+  } else {
+    toolbar?.classList.remove("shadow");
+  }
 };
 
 const setTrashButtonVisibility = () => {
@@ -220,7 +246,7 @@ const setTrashButtonVisibility = () => {
 watch(
   () => [props.events, calendarLocale.value],
   () => {
-    const api = (homeworkList.value as any)?.getApi?.();
+    const api = homeworkList.value?.getApi?.();
     if (api && typeof api.refetchEvents === "function") {
       api.refetchEvents();
       api.setOption("visibleRange", setVisibleRange());
@@ -245,19 +271,19 @@ onBeforeUnmount(() => {
 
 <style>
 .listView .fc-header-toolbar {
-    position: fixed; 
-    z-index:50; 
-    padding: 10px;
-    background: var(--main-bg-color); 
-    right: 0; 
-    left: 0; 
-    top:0;
+  position: fixed;
+  z-index: 50;
+  padding: 10px;
+  background: var(--main-bg-color);
+  right: 0;
+  left: 0;
+  top: 0;
 }
 .listView .fc-view-harness {
-    top: 55px;
+  top: 55px;
 }
 .shadow {
-    box-shadow: 5px 0px 10px;
+  box-shadow: 5px 0px 10px;
 }
 td.fc-list-event-title {
   padding: 0px !important;

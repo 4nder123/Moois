@@ -1,8 +1,13 @@
 import type { NitroApp } from "nitropack";
 import { Server as Engine } from "engine.io";
-import { Server, Socket } from "socket.io";
+import type { Socket } from "socket.io";
+import { Server } from "socket.io";
 import { defineEventHandler } from "h3";
-import { upsertHomeworkState, addHomework, removeHomework } from "~~/server/services/homeworkStateService";
+import {
+  upsertHomeworkState,
+  addHomework,
+  removeHomework,
+} from "~~/server/services/homeworkStateService";
 
 const startSessionCheck = (socket: Socket, intervalMs = 60_000) => {
   const interval = setInterval(async () => {
@@ -35,14 +40,14 @@ export default defineNitroPlugin((nitroApp: NitroApp) => {
     try {
       const cookie = socket.request.headers.cookie || "";
       const session = await auth.api.getSession({ headers: { cookie } });
-      
+
       if (!session?.user?.id) {
         return next(new Error("Unauthorized"));
       }
 
       socket.data.user = session.user;
       next();
-    } catch (error) {
+    } catch {
       next(new Error("Unauthorized"));
     }
   });
@@ -50,7 +55,7 @@ export default defineNitroPlugin((nitroApp: NitroApp) => {
   io.on("connection", (socket) => {
     const userId = socket.data.user?.id;
     socket.join(userId);
-    
+
     startSessionCheck(socket);
 
     socket.on("event-updated", async (event) => {
@@ -67,7 +72,7 @@ export default defineNitroPlugin((nitroApp: NitroApp) => {
 
         socket.to(userId).emit("event-updated", event);
       } catch (error) {
-        console.error("Failed to update homework state:", error); 
+        console.error("Failed to update homework state:", error);
       }
     });
 
@@ -79,7 +84,7 @@ export default defineNitroPlugin((nitroApp: NitroApp) => {
 
         socket.to(userId).emit("event-added", event);
       } catch (error) {
-        console.error("Failed to add homework event:", error); 
+        console.error("Failed to add homework event:", error);
       }
     });
 
@@ -88,28 +93,33 @@ export default defineNitroPlugin((nitroApp: NitroApp) => {
         if (!userId || !event?.id) return;
 
         await removeHomework(event.id, userId);
-        
+
         socket.to(userId).emit("event-removed", event);
       } catch (error) {
-        console.error("Failed to remove homework event:", error); 
+        console.error("Failed to remove homework event:", error);
       }
     });
-    
   });
 
   nitroApp.router.use(
     "/socket.io/",
     defineEventHandler({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       handler(event: any) {
         engine.handleRequest(event.node.req, event.node.res);
         event._handled = true;
       },
       websocket: {
-        open(peer) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        open(peer: any) {
           // @ts-expect-error private method and property
           engine.prepare(peer._internal.nodeReq);
           // @ts-expect-error private method and property
-           engine.onWebSocket(peer._internal.nodeReq, peer._internal.nodeReq.socket, peer.websocket);
+          engine.onWebSocket(
+            peer._internal.nodeReq,
+            peer._internal.nodeReq.socket,
+            peer.websocket,
+          );
         },
       },
     }),
