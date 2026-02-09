@@ -48,7 +48,7 @@ const signInCopy = {
 } as const;
 
 export const auth = betterAuth({
-  baseURL: `https://${process.env.MAIN_URL}`,
+  baseURL: process.env.BETTER_AUTH_BASE_URL,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -77,7 +77,7 @@ export const auth = betterAuth({
       storeOTP: "hashed",
       async sendVerificationOTP({ email, otp, type }, request) {
         if (type !== "sign-in") return;
-        const locale = getLocale(request);
+        const locale = "et";
         const subject = signInCopy[locale].subject;
         const body = signInCopy[locale];
         if (!transporter) {
