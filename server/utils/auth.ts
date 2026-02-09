@@ -48,6 +48,7 @@ const signInCopy = {
 } as const;
 
 export const auth = betterAuth({
+  baseURL: `https://${process.env.MAIN_URL}`,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
