@@ -60,20 +60,17 @@ export const getEvents = async (userId: string) => {
   try {
     const urlString = await getHomeworkUrl(userId);
     if (!urlString) return userHomeworkEvents;
-    
-    const cacheKey = `homework-${urlString}`;
-    const icsEvents = await getCachedOrFetch(
-      cacheKey,
-      async () => {
-        const url = new URL(urlString);
-        if (!allowedHosts.some((host) => url.hostname.includes(host)))
-          throw createError({ statusCode: 400, message: "Invalid URL host" });
 
-        const { data } = await axios.get(url.toString(), { timeout: 8000 });
-        return await icsHomeworkConverter(data.toString());
-      }
-    );
-    
+    const cacheKey = `homework-${urlString}`;
+    const icsEvents = await getCachedOrFetch(cacheKey, async () => {
+      const url = new URL(urlString);
+      if (!allowedHosts.some((host) => url.hostname.includes(host)))
+        throw createError({ statusCode: 400, message: "Invalid URL host" });
+
+      const { data } = await axios.get(url.toString(), { timeout: 8000 });
+      return await icsHomeworkConverter(data.toString());
+    });
+
     const icsWithProps = await attachExtendedProps(userId, icsEvents);
     return [...icsWithProps, ...userHomeworkEvents];
   } catch (event) {

@@ -59,7 +59,7 @@ export const auth = betterAuth({
   advanced: {
     cookies: {
       session_token: {
-        name: process.env.NODE_ENV === "production" ? "__Host-SID" : "SID",
+        name: "SID",
         attributes: {
           sameSite: "strict",
         },

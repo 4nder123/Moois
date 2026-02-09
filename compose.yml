@@ -50,7 +50,7 @@ services:
 networks:
   moois:
     external: false
-    
+
 volumes:
   db_data:
   traefik-certs:

@@ -15,20 +15,17 @@ export const getEvents = async (userId: string) => {
   try {
     const urlString = await getTimetableUrl(userId);
     if (!urlString) return [];
-    
+
     // Include URL in cache key so cache auto-invalidates when URL changes
     const cacheKey = `timetable-${urlString}`;
-    return await getCachedOrFetch(
-      cacheKey,
-      async () => {
-        const url = new URL(urlString);
-        if (!allowedHosts.some((host) => url.hostname.includes(host)))
-          throw createError({ statusCode: 400, message: "Invalid URL host" });
+    return await getCachedOrFetch(cacheKey, async () => {
+      const url = new URL(urlString);
+      if (!allowedHosts.some((host) => url.hostname.includes(host)))
+        throw createError({ statusCode: 400, message: "Invalid URL host" });
 
-        const { data } = await axios.get(url.toString(), { timeout: 8000 });
-        return await icsTimetableConverter(data.toString());
-      }
-    );
+      const { data } = await axios.get(url.toString(), { timeout: 8000 });
+      return await icsTimetableConverter(data.toString());
+    });
   } catch {
     throw createError({
       statusCode: 500,

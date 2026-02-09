@@ -9,7 +9,7 @@ const cache = new Map<string, CacheEntry<any>>();
 export const getCachedOrFetch = async <T>(
   key: string,
   fetchFn: () => Promise<T>,
-  maxAge: number = 30 * 60 * 1000
+  maxAge: number = 30 * 60 * 1000,
 ): Promise<T> => {
   const cached = cache.get(key);
   const now = Date.now();
