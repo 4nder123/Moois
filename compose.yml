@@ -4,7 +4,7 @@ services:
     container_name: traefik
     command:
       - --configFile=/etc/traefik/traefik.yml
-      - --certificatesResolvers.myresolver.acme.email=${TRAEFIK_EMAIL}
+      - --certificatesResolvers.resolver.acme.email=${TRAEFIK_EMAIL}
     ports:
       - "80:80"
       - "443:443"
@@ -29,6 +29,7 @@ services:
     build: .
     restart: unless-stopped
     environment:
+      BETTER_AUTH_BASE_URL: "https://${MAIN_URL}"
       BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET}"
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
       GMAIL_USER: "${GMAIL_USER}"
