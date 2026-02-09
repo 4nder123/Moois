@@ -11,8 +11,9 @@
           id="filter-switch"
           type="checkbox"
           :checked="!filter.includes('done')"
+          @click="setFilter('done')"
         />
-        <label for="filter-switch" @click="setFilter('done')">Toggle</label>
+        <label for="filter-switch">Toggle</label>
       </div>
       <div class="color-options">
         <span>{{ $t("filter.color") }}</span>
