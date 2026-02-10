@@ -1,11 +1,8 @@
 import { getEvents } from "~~/server/controllers/homeworkController";
 
-export default defineEventHandler(async (event) => {
-  const session = await auth.api.getSession({
-    headers: event.headers,
-  });
-
-  if (!session)
-    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
-  return await getEvents(event, session.user.id);
+export default defineEventHandler({
+  onRequest: [requireAuth],
+  handler: async (event) => {
+    return await getEvents(event, event.context.auth.user.id);
+  },
 });

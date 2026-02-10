@@ -30,7 +30,7 @@ export const auth = betterAuth({
         attributes: {
           sameSite: "strict",
         },
-      }
+      },
     },
   },
   user: {
