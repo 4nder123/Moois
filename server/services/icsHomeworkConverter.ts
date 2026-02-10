@@ -28,7 +28,7 @@ const getCourse = async (courseId: string) => {
 };
 
 const parseEvent = async (event: VEVENT): Promise<HomeworkEvent> => {
-  const title = event.categories
+  const title = event.categories?.[0]
     ? (await getCourse(event.categories[0])) + " - " + event.summary
     : event.summary;
   return {
@@ -58,7 +58,7 @@ export default async function convertIcsToHomework(
     if (events.type !== "VEVENT") continue;
 
     const event = await parseEvent(events as VEVENT);
-    const key = getDayKey(event.start);
+    const key = getDayKey(event.start) as string;
 
     if (!map.has(key)) map.set(key, []);
     const dayEvents = map.get(key);

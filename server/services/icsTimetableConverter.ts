@@ -44,7 +44,7 @@ const getWeekStart = (d: Date) => {
 };
 
 const getDate = (datetime: Date): string => {
-  return datetime.toISOString().split("T")[0];
+  return datetime.toISOString().split("T")[0] || "";
 };
 
 const isExdate = (date: Date, exdates: Date[]) => {
@@ -64,7 +64,9 @@ const parseEvent = (event: VEVENT, start: Date): TimetableEvent => {
     start: start.getTime(),
     end: end.getTime(),
     allDay: isAllDay,
-    color: event.categories ? getCategoryColor(event.categories[0]) : "#5089ee",
+    color: event.categories?.[0]
+      ? getCategoryColor(event.categories[0])
+      : "#5089ee",
     extendedProps: {
       description: [event.description?.trim(), event.location?.trim()]
         .filter(Boolean)

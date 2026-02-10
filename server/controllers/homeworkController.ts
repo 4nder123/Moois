@@ -67,7 +67,7 @@ export const getEvents = async (userId: string) => {
       if (!allowedHosts.some((host) => url.hostname.includes(host)))
         throw createError({ statusCode: 400, message: "Invalid URL host" });
 
-      const { data } = await axios.get(url.toString(), { timeout: 8000 });
+      const { data } = await axios.get(url.toString(), { timeout: 30000 });
       return await icsHomeworkConverter(data.toString());
     });
 
