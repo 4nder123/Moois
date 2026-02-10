@@ -1,6 +1,5 @@
 import type { VEvent } from "node-ical";
 import ical from "node-ical";
-import axios from "axios";
 import type { HomeworkEvent } from "~~/shared/types/event.types";
 
 interface VEVENT extends VEvent {
@@ -14,7 +13,7 @@ const getCourse = async (courseId: string) => {
   const validCourseId = courseId.match(/^[A-Z, 0-9]+[.][0-9]+[.][0-9]+/);
   if (validCourseId) {
     try {
-      const courseName = await axios.get(
+      const courseName: any = await $fetch(
         "https://ois2.ut.ee/api/courses/" + validCourseId.toString(),
       );
       const courseJson = courseName.data;

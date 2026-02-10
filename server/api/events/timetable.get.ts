@@ -7,5 +7,5 @@ export default defineEventHandler(async (event) => {
 
   if (!session)
     throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
-  return await getEvents(session.user.id);
+  return await getEvents(event, session.user.id);
 });

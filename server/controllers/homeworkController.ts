@@ -1,6 +1,4 @@
-import axios from "axios";
-import icsHomeworkConverter from "~~/server/services/icsHomeworkConverter";
-import { getCachedOrFetch } from "~~/server/utils/cache";
+import type { H3Event } from 'h3'
 
 const allowedHosts = ["moodle"];
 
@@ -54,22 +52,17 @@ const getUserHomeworkEvents = async (
   }));
 };
 
-export const getEvents = async (userId: string) => {
+export const getEvents = async (event: H3Event, userId: string) => {
   const userHomeworkEvents = await getUserHomeworkEvents(userId);
 
   try {
     const urlString = await getHomeworkUrl(userId);
     if (!urlString) return userHomeworkEvents;
+    const url = new URL(urlString);
+    if (!allowedHosts.some((host) => url.hostname.includes(host)))
+      throw createError({ statusCode: 400, message: "Invalid URL host" });
 
-    const cacheKey = `homework-${urlString}`;
-    const icsEvents = await getCachedOrFetch(cacheKey, async () => {
-      const url = new URL(urlString);
-      if (!allowedHosts.some((host) => url.hostname.includes(host)))
-        throw createError({ statusCode: 400, message: "Invalid URL host" });
-
-      const { data } = await axios.get(url.toString(), { timeout: 30000 });
-      return await icsHomeworkConverter(data.toString());
-    });
+    const icsEvents = await getHomeworkJson(event, url.toString());
 
     const icsWithProps = await attachExtendedProps(userId, icsEvents);
     return [...icsWithProps, ...userHomeworkEvents];
