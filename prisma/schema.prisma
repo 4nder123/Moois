@@ -22,6 +22,7 @@ model User {
   userHomeworks     UserHomework[]
 
   @@unique([email])
+  @@index([email])
   @@map("user")
 }
 
@@ -37,6 +38,7 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
+  @@index([userId, token])
   @@map("session")
 }
 
@@ -48,6 +50,7 @@ model Verification {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
 
+  @@index([identifier])
   @@map("verification")
 }
 
@@ -60,6 +63,7 @@ model iCalHomeworkState {
   user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, homeworkId])
+  @@index([userId, homeworkId])
   @@map("iCalHomeworkState")
 }
 
@@ -73,6 +77,7 @@ model UserHomework {
   userId    String
   user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([id, userId])
   @@map("userHomework")
 }
 

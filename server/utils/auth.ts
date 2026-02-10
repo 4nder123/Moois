@@ -1,4 +1,4 @@
-import { betterAuth } from "better-auth";
+import { betterAuth } from "better-auth/minimal";
 import { emailOTP } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
@@ -10,6 +10,10 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
   session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
     expiresIn: 60 * 60 * 24 * 30,
     updateAge: 60 * 60 * 24,
   },
@@ -21,6 +25,12 @@ export const auth = betterAuth({
           sameSite: "strict",
         },
       },
+      session_data: {
+        name: "SID_DATA",
+        attributes: {
+          sameSite: "strict",
+        },
+      }
     },
   },
   user: {
@@ -34,7 +44,11 @@ export const auth = betterAuth({
       storeOTP: "hashed",
       async sendVerificationOTP({ email, otp, type }, request) {
         if (type !== "sign-in") return;
-        await emailService.sendSignInOTP(email, otp, request);
+        await emailService.sendSignInOTP(
+          email,
+          otp,
+          request as unknown as Request,
+        );
       },
     }),
   ],

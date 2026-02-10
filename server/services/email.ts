@@ -1,4 +1,3 @@
-import type { GenericEndpointContext } from "better-auth";
 import nodemailer from "nodemailer";
 
 const gmailUser = process.env.GMAIL_USER;
@@ -28,7 +27,7 @@ const transporter =
       })
     : null;
 
-const getLocale = (request?: GenericEndpointContext | undefined) => {
+const getLocale = (request?: Request | undefined) => {
   const cookieHeader = request?.headers?.get("cookie") ?? "";
   const match = cookieHeader.match(/(?:^|;\s*)i18n_redirected=([^;]+)/);
   if (match?.[1] === "en") return "en";
@@ -55,7 +54,7 @@ export const emailService = {
   sendSignInOTP: async (
     email: string,
     otp: string,
-    request?: GenericEndpointContext,
+    request?: Request | undefined,
   ) => {
     const locale = getLocale(request);
     const emailContent = createEmail(otp, locale);

@@ -13,10 +13,10 @@ const getCourse = async (courseId: string) => {
   const validCourseId = courseId.match(/^[A-Z, 0-9]+[.][0-9]+[.][0-9]+/);
   if (validCourseId) {
     try {
-      const courseName: any = await $fetch(
+      const courseName = await $fetch<{ title: { et: string; en: string } }>(
         "https://ois2.ut.ee/api/courses/" + validCourseId.toString(),
       );
-      const courseJson = courseName.data;
+      const courseJson = courseName;
       courseIds[courseId] = courseJson["title"]["et"];
       return courseJson["title"]["et"];
     } catch (error) {
