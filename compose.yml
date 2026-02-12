@@ -30,6 +30,9 @@ services:
   moois:
     build: .
     restart: unless-stopped
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     environment:
       TZ: "Europe/Tallinn"
       BETTER_AUTH_BASE_URL: ${BETTER_AUTH_BASE_URL}

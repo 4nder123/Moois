@@ -1,4 +1,5 @@
 import type { H3Event } from "h3";
+import icsTimetableConverter from "../services/icsTimetableConverter";
 
 const allowedHosts = ["ois2", "tahvel"];
 
@@ -17,7 +18,7 @@ export const getEvents = async (event: H3Event, userId: string) => {
     if (!allowedHosts.some((host) => url.hostname.includes(host)))
       throw createError({ statusCode: 400, message: "Invalid URL host" });
 
-    return await getTimetableJson(event, url.toString());
+    return await getEventJson(icsTimetableConverter, event, url.toString());
   } catch (event) {
     console.log(event);
     throw createError({

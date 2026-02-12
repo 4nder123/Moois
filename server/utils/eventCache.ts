@@ -1,27 +1,23 @@
+import crypto from "crypto";
 import type { H3Event } from "h3";
-import icsHomeworkConverter from "~~/server/services/icsHomeworkConverter";
-import icsTimetableConverter from "~~/server/services/icsTimetableConverter";
 
-export const getHomeworkJson = defineCachedFunction(
-  async (event: H3Event, url: string) => {
-    const response = await $fetch(url.toString());
-    return await icsHomeworkConverter(response as string);
+function md5(input: string) {
+  return crypto.createHash("md5").update(input).digest("hex");
+}
+
+type EventConverter<T> = (response: string) => T | Promise<T>;
+
+export const getEventJson = defineCachedFunction(
+  async <T>(converter: EventConverter<T>, event: H3Event, url: string) => {
+    const startTime = Date.now();
+    const response = await $fetch(url);
+    console.log(`Fetched ${url} in ${Date.now() - startTime}ms`);
+    return converter(response as string);
   },
   {
-    maxAge: 60 * 30,
+    maxAge: 60 * 5,
     name: "icsHomework",
-    getKey: (event: H3Event, url: string) => url,
-  },
-);
-
-export const getTimetableJson = defineCachedFunction(
-  async (event: H3Event, url: string) => {
-    const response = await $fetch(url.toString());
-    return await icsTimetableConverter(response as string);
-  },
-  {
-    maxAge: 60 * 30,
-    name: "icsTimetable",
-    getKey: (event: H3Event, url: string) => url,
+    getKey: <T>(converter: EventConverter<T>, event: H3Event, url: string) =>
+      md5(url),
   },
 );

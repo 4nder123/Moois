@@ -1,4 +1,5 @@
 import type { H3Event } from "h3";
+import icsHomeworkConverter from "../services/icsHomeworkConverter";
 
 const allowedHosts = ["moodle"];
 
@@ -62,8 +63,11 @@ export const getEvents = async (event: H3Event, userId: string) => {
     if (!allowedHosts.some((host) => url.hostname.includes(host)))
       throw createError({ statusCode: 400, message: "Invalid URL host" });
 
-    const icsEvents = await getHomeworkJson(event, url.toString());
-
+    const icsEvents = await getEventJson(
+      icsHomeworkConverter,
+      event,
+      url.toString(),
+    );
     const icsWithProps = await attachExtendedProps(userId, icsEvents);
     return [...icsWithProps, ...userHomeworkEvents];
   } catch (event) {

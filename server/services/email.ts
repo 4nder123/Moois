@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-import { p } from "vue-router/dist/router-CWoNjPRp.mjs";
 
 const gmailUser = process.env.GMAIL_USER;
 const gmailPass = process.env.GMAIL_APP_PASSWORD;

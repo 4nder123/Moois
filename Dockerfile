@@ -1,5 +1,5 @@
 # Build stage
-FROM node:24-alpine AS build
+FROM node:lts-alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
@@ -12,7 +12,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # Runtime stage
-FROM node:24-alpine
+FROM node:lts-alpine
 WORKDIR /app
 
 COPY package*.json ./
