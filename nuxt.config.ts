@@ -6,6 +6,18 @@ export default defineNuxtConfig({
     experimental: {
       websocket: true,
     },
+    publicAssets: [
+      {
+        baseURL: "icons",
+        dir: "public/icons",
+        maxAge: 60 * 60 * 24 * 365,
+      },
+    ],
+    compressPublicAssets: true,
+    minify: true,
+  },
+  features: {
+    inlineStyles: true,
   },
   app: { head: { title: "Moois" } },
   modules: [

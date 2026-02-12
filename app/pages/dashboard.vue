@@ -237,7 +237,7 @@ onMounted(() => {
   startAutoRefresh();
 });
 
-onBeforeMount(() => {
+onBeforeUnmount(() => {
   stopAutoRefresh();
   socket.off("event-updated");
   socket.off("event-added");
