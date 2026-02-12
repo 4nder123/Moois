@@ -9,9 +9,7 @@ type EventConverter<T> = (response: string) => T | Promise<T>;
 
 export const getEventJson = defineCachedFunction(
   async <T>(converter: EventConverter<T>, event: H3Event, url: string) => {
-    const startTime = Date.now();
     const response = await $fetch(url);
-    console.log(`Fetched ${url} in ${Date.now() - startTime}ms`);
     return converter(response as string);
   },
   {
