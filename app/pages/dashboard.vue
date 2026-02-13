@@ -145,7 +145,6 @@ const updateHomeworkState = async (event: HomeworkStateUpdate) => {
 
 const addHomeworkEvent = (event: HomeworkEvent) => {
   homeworkData.value = [...(homeworkData.value ?? []), event];
-  console.log(homeworkData.value);
 };
 
 const removeHomeworkEvent = (event: { id: string }) => {
@@ -156,7 +155,6 @@ const eventUpdateId = (data: { tempId: string; newId: string }) => {
   homeworkData.value = homeworkData.value?.map((e) =>
     e.id === data.tempId ? { ...e, id: data.newId } : e,
   );
-  console.log(homeworkData.value);
 };
 
 const HomeworkEventUpdated = (event: HomeworkStateUpdate) => {
