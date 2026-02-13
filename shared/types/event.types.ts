@@ -1,13 +1,15 @@
-interface EventBase {
+import type { Status, HighlightColor } from "@prisma/client";
+
+export interface EventBase {
   id: string;
   title: string;
   start: number;
-  end: number;
+  end?: number;
 }
 
-export type EventStatus = "highlighted" | "done" | "";
+export type EventStatus = Status | null;
 
-export type HighColor = "red" | "orange" | "yellow";
+export type HighColor = HighlightColor | null;
 
 export interface TimetableEvent extends EventBase {
   allDay: boolean;
@@ -21,10 +23,16 @@ export interface HomeworkEvent extends EventBase {
   extendedProps: {
     userAdded: boolean;
     status: EventStatus;
-    color: HighColor | "";
+    color: HighColor;
   };
 }
 
 export interface TimetableEvents {
   [weekStart: string]: TimetableEvent[];
 }
+
+export type HomeworkStateUpdate = {
+  id: string;
+  status?: EventStatus | null;
+  color?: HighColor | null;
+};

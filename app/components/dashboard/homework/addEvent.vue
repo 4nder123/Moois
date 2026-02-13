@@ -103,8 +103,8 @@ const submit = (e: SubmitEvent) => {
     end: new Date(`${dateValue}T${timeValue}`).getTime(),
     extendedProps: {
       userAdded: true,
-      status: "",
-      color: "",
+      status: null,
+      color: null,
     },
   };
 

@@ -18,7 +18,7 @@ model User {
   homeworkUrl  String?
   timetableUrl String?
 
-  iCalHomeworkState iCalHomeworkState[]
+  homeworkState HomeworkState[]
   userHomeworks     UserHomework[]
 
   @@unique([email])
@@ -54,26 +54,24 @@ model Verification {
   @@map("verification")
 }
 
-model iCalHomeworkState {
+model HomeworkState {
   id         String          @id @default(uuid())
-  homeworkId String
+  homeworkId String          
   status     Status?
-  color      HighlightColor?
+  color      HighlightColor?  
   userId     String
+  updatedAt  DateTime        @default(now()) @updatedAt
   user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, homeworkId])
   @@index([userId, homeworkId])
-  @@map("iCalHomeworkState")
+  @@map("homeworkState")
 }
 
 model UserHomework {
   id        String          @id @default(uuid())
   title     String
   start     DateTime
-  status    Status?
-  color     HighlightColor?
-  userAdded Boolean         @default(true)
   userId    String
   user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 

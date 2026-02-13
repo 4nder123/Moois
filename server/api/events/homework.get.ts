@@ -3,6 +3,7 @@ import { getEvents } from "~~/server/controllers/homeworkController";
 export default defineEventHandler({
   onRequest: [requireAuth],
   handler: async (event) => {
-    return await getEvents(event, event.context.auth.user.id);
+    const user = event.context.auth.user;
+    return await getEvents(event, user.id, user.homeworkUrl);
   },
 });

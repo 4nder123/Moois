@@ -80,8 +80,8 @@ const timetableEvents = computed<TimetableEvents>(() => {
 const homeworkEvents = computed<HomeworkEvent[]>(() => {
   return (homeworkData.value?.filter(
     (e) =>
-      !store.filter.includes(e.extendedProps.status) &&
-      !store.filter.includes(e.extendedProps.color),
+      !store.filter.includes(e.extendedProps.status ?? "") &&
+      !store.filter.includes(e.extendedProps.color ?? ""),
   ) ?? []) as HomeworkEvent[];
 });
 
@@ -128,19 +128,15 @@ const handleLogout = async () => {
   }
 };
 
-const updateHomeworkState = async (event: {
-  id: string;
-  status: EventStatus;
-  color: HighColor | "";
-}) => {
+const updateHomeworkState = async (event: HomeworkStateUpdate) => {
   homeworkData.value = homeworkData.value?.map((e) =>
     e.id === event.id
       ? {
           ...e,
           extendedProps: {
             ...e.extendedProps,
-            status: event.status,
-            color: event.color,
+            status: event.status ?? null,
+            color: event.color ?? null,
           },
         }
       : e,
@@ -149,18 +145,21 @@ const updateHomeworkState = async (event: {
 
 const addHomeworkEvent = (event: HomeworkEvent) => {
   homeworkData.value = [...(homeworkData.value ?? []), event];
+  console.log(homeworkData.value);
 };
 
 const removeHomeworkEvent = (event: { id: string }) => {
   homeworkData.value = homeworkData.value?.filter((e) => e.id !== event.id);
 };
 
-const HomeworkEventUpdated = (event: {
-  id: string;
-  status: EventStatus;
-  color: HighColor | "";
-  userAdded: boolean;
-}) => {
+const eventUpdateId = (data: { tempId: string; newId: string }) => {
+  homeworkData.value = homeworkData.value?.map((e) =>
+    e.id === data.tempId ? { ...e, id: data.newId } : e,
+  );
+  console.log(homeworkData.value);
+};
+
+const HomeworkEventUpdated = (event: HomeworkStateUpdate) => {
   updateHomeworkState(event);
   socket.emit("event-updated", event);
 };
@@ -212,7 +211,7 @@ const startAutoRefresh = () => {
       refreshTimetable();
       refreshHomework();
     },
-    30 * 60 * 1000,
+    1000 * 60 * 30,
   );
 };
 
@@ -231,6 +230,9 @@ onMounted(() => {
   socket.on("event-added", (event) => {
     addHomeworkEvent(event);
   });
+  socket.on("event-update-id", (event) => {
+    eventUpdateId(event);
+  });
   socket.on("event-removed", (event) => {
     removeHomeworkEvent(event);
   });
@@ -241,6 +243,7 @@ onBeforeUnmount(() => {
   stopAutoRefresh();
   socket.off("event-updated");
   socket.off("event-added");
+  socket.off("event-update-id");
   socket.off("event-removed");
   socket.disconnect();
 });

@@ -56,15 +56,7 @@ import FilterModal from "./filterModal.vue";
 const store = useDashboardStore();
 const emit = defineEmits<{
   (e: "show-settings" | "change-view"): void;
-  (
-    e: "event-updated",
-    payload: {
-      id: string;
-      status: EventStatus;
-      color: HighColor | "";
-      userAdded: boolean;
-    },
-  ): void;
+  (e: "event-updated", payload: HomeworkStateUpdate): void;
   (e: "event-added", payload: HomeworkEvent): void;
   (e: "event-removed", payload: { id: string }): void;
 }>();
@@ -105,7 +97,6 @@ const onColorSelect = (e: Event) => {
     id: event.id,
     status: "highlighted",
     color: color as HighColor,
-    userAdded: event.extendedProps.userAdded,
   });
 };
 
@@ -125,20 +116,19 @@ const eventClick = (eventClick: EventClickArg) => {
 
   const status = isHighlightClick
     ? isHighlighted
-      ? ""
+      ? null
       : "highlighted"
     : isDone
-      ? ""
+      ? null
       : "done";
 
   const color =
-    isHighlightClick && status === "highlighted" ? store.highlightColor : "";
+    isHighlightClick && status === "highlighted" ? store.highlightColor : null;
 
   emit("event-updated", {
     id: event.id,
     status,
     color,
-    userAdded: event.extendedProps.userAdded,
   });
 };
 

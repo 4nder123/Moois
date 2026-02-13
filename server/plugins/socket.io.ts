@@ -7,7 +7,7 @@ import {
   upsertHomeworkState,
   addHomework,
   removeHomework,
-} from "~~/server/services/homeworkStateService";
+} from "~~/server/services/database";
 
 const startSessionCheck = (socket: Socket, intervalMs = 60_000) => {
   const interval = setInterval(async () => {
@@ -62,13 +62,7 @@ export default defineNitroPlugin((nitroApp: NitroApp) => {
       try {
         if (!userId || !event?.id) return;
 
-        await upsertHomeworkState({
-          userId,
-          homeworkId: event.id,
-          status: event.status ?? null,
-          color: event.color ?? null,
-          userAdded: event.userAdded,
-        });
+        await upsertHomeworkState(event, userId);
 
         socket.to(userId).emit("event-updated", event);
       } catch (error) {
@@ -79,10 +73,12 @@ export default defineNitroPlugin((nitroApp: NitroApp) => {
     socket.on("event-added", async (event) => {
       try {
         if (!userId || !event?.id) return;
-
-        await addHomework(event, userId);
-
-        socket.to(userId).emit("event-added", event);
+        const addedEvent = await addHomework(event, userId);
+        socket.emit("event-update-id", {
+          tempId: event.id,
+          newId: addedEvent.id,
+        });
+        socket.to(userId).emit("event-added", { ...event, id: addedEvent.id });
       } catch (error) {
         console.error("Failed to add homework event:", error);
       }

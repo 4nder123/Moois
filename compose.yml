@@ -48,7 +48,7 @@ services:
       - "traefik.http.routers.moois.tls.certresolver=resolver"
       - "traefik.http.routers.moois.tls.domains[0].main=${MAIN_URL}"
       - "traefik.http.services.moois.loadbalancer.server.port=3000"
-      - "traefik.http.middlewares.compress.compress=true" 
+      - "traefik.http.middlewares.compress.compress=true"
       - "traefik.http.routers.moois.middlewares=compress"
     depends_on:
       - db

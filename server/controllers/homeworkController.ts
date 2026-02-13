@@ -1,77 +1,71 @@
 import type { H3Event } from "h3";
+import { getHomeworkStates, getUserHomeworks } from "../services/database";
 import icsHomeworkConverter from "../services/icsHomeworkConverter";
 
 const allowedHosts = ["moodle"];
 
-const getHomeworkUrl = async (userId: string): Promise<string> => {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw new Error("User not found");
-  if (!user.homeworkUrl) return "";
-  return user.homeworkUrl;
-};
+const addExtendedProps = async (
+  userId: string,
+  iCalEvents: EventBase[],
+  userEvents: EventBase[],
+) => {
+  const states = await getHomeworkStates(userId);
+  const stateMap = new Map(states.map((state) => [state.homeworkId, state]));
+  const userEventIds = new Set(userEvents.map((e) => e.id));
 
-const attachExtendedProps = async (userId: string, events: HomeworkEvent[]) => {
-  const states = await prisma.iCalHomeworkState.findMany({
-    where: { userId },
-    select: { homeworkId: true, status: true, color: true },
-  });
+  const allEvents = [...iCalEvents, ...userEvents];
 
-  const stateMap = new Map(
-    states.map((s) => [s.homeworkId, { status: s.status, color: s.color }]),
-  );
-  return events.map((ev) => {
-    const state = stateMap.get(ev.id);
+  return allEvents.map((event) => {
+    const state = stateMap.get(event.id);
+
     return {
-      ...ev,
+      ...event,
       extendedProps: {
-        userAdded: false,
-        status: state?.status ?? "",
-        color: state?.color ?? "",
+        status: state?.status ?? null,
+        color: state?.color ?? null,
+        userAdded: userEventIds.has(event.id),
       },
     };
   });
 };
 
-const getUserHomeworkEvents = async (
-  userId: string,
-): Promise<HomeworkEvent[]> => {
-  const userHomeworks = await prisma.userHomework.findMany({
-    where: { userId },
-    select: { id: true, title: true, start: true, status: true, color: true },
-  });
-
-  return userHomeworks.map((hw) => ({
-    id: hw.id,
-    title: hw.title,
-    start: hw.start.getTime(),
-    end: hw.start.getTime(),
-    extendedProps: {
-      userAdded: true,
-      status: hw.status ?? "",
-      color: hw.color ?? "",
-    },
-  }));
-};
-
-export const getEvents = async (event: H3Event, userId: string) => {
-  const userHomeworkEvents = await getUserHomeworkEvents(userId);
-
+const getUserEvents = async (userId: string) => {
   try {
-    const urlString = await getHomeworkUrl(userId);
-    if (!urlString) return userHomeworkEvents;
-    const url = new URL(urlString);
-    if (!allowedHosts.some((host) => url.hostname.includes(host)))
-      throw createError({ statusCode: 400, message: "Invalid URL host" });
-
-    const icsEvents = await getEventJson(
-      icsHomeworkConverter,
-      event,
-      url.toString(),
-    );
-    const icsWithProps = await attachExtendedProps(userId, icsEvents);
-    return [...icsWithProps, ...userHomeworkEvents];
+    const events = await getUserHomeworks(userId);
+    return events.map((event) => ({
+      ...event,
+      start: event.start.getTime(),
+    }));
   } catch (event) {
     console.log(event);
-    return userHomeworkEvents;
+    return [];
+  }
+};
+const getICalEvents = async (event: H3Event, urlString: string) => {
+  try {
+    const url = new URL(urlString);
+    if (!urlString || !allowedHosts.some((host) => url.hostname.includes(host)))
+      return [];
+    return await getEventJson(icsHomeworkConverter, event, url.toString());
+  } catch (event) {
+    console.log(event);
+    return [];
+  }
+};
+
+export const getEvents = async (
+  event: H3Event,
+  userId: string,
+  url: string,
+) => {
+  try {
+    const [iCalEvents, userEvents] = await Promise.all([
+      getICalEvents(event, url),
+      getUserEvents(userId),
+    ]);
+    return await addExtendedProps(userId, iCalEvents, userEvents);
+  } catch (event) {
+    console.log(event);
+    return [];
   }
 };

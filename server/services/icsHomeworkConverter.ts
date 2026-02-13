@@ -1,6 +1,5 @@
 import type { VEvent } from "node-ical";
 import ical from "node-ical";
-import type { HomeworkEvent } from "~~/shared/types/event.types";
 
 interface VEVENT extends VEvent {
   categories?: string[];
@@ -26,7 +25,7 @@ const getCourse = async (courseId: string) => {
   return (courseIds[courseId] = courseId);
 };
 
-const parseEvent = async (event: VEVENT): Promise<HomeworkEvent> => {
+const parseEvent = async (event: VEVENT): Promise<EventBase> => {
   const title = event.categories?.[0]
     ? (await getCourse(event.categories[0])) + " - " + event.summary
     : event.summary;
@@ -35,11 +34,6 @@ const parseEvent = async (event: VEVENT): Promise<HomeworkEvent> => {
     title: title,
     start: new Date(event.start).getTime(),
     end: new Date(event.end).getTime(),
-    extendedProps: {
-      userAdded: false,
-      status: "",
-      color: "",
-    },
   };
 };
 
@@ -49,9 +43,9 @@ const baseTitle = (title: string) => title.replace(/\w+[.!?]?$/, "");
 
 export default async function convertIcsToHomework(
   icsData: string,
-): Promise<HomeworkEvent[]> {
+): Promise<EventBase[]> {
   const icsObject = ical.parseICS(icsData);
-  const map = new Map<string, HomeworkEvent[]>();
+  const map = new Map<string, EventBase[]>();
 
   for (const events of Object.values(icsObject)) {
     if (events.type !== "VEVENT") continue;
